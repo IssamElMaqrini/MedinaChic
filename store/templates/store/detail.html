@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-{% for product in products %}
     <h2>{{ product.name }}</h2>
+    <h3>${{ product.price }}</h3>
     <img src="{{ product.thumbnail.url }}" alt="{{ product.name }}">
-    <a href="{{ product.get_absolute_url }}">Voir l'article</a>
-{% endfor %}
+    <p>{{ product.description }}</p>
+    <p>{{ product.quantity }} en stock</p>
 {% endblock %}
