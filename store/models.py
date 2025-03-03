@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls.base import reverse
+from django.utils import timezone
 
 from MedinaChic.settings import AUTH_USER_MODEL
 
@@ -11,6 +12,7 @@ class Product(models.Model):
     quantity = models.IntegerField(default=0)
     description = models.TextField(blank=True)
     thumbnail = models.ImageField(upload_to="products/", blank=True, null=True)
+    stripe_id = models.CharField(max_length=90, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.quantity})"
@@ -24,6 +26,7 @@ class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     ordered = models.BooleanField(default=False)
+    ordered_date = models.DateTimeField(blank=True, null=True)
     def __str__(self):
         return f"{self.product.name} ({self.quantity})"
 
@@ -31,10 +34,19 @@ class Order(models.Model):
 class Cart(models.Model):
     user = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.CASCADE)
     orders = models.ManyToManyField(Order)
-    ordered = models.BooleanField(default=False)
-    ordered_date = models.DateTimeField(blank=True, null=True)
+
+
     def __str__(self):
         return self.user.username
+
+    def delete(self, *args, **kwargs):
+        for order in self.orders.all():
+            order.ordered = True
+            order.ordered_date = timezone.now()
+            order.save()
+
+        self.orders.clear()
+        super().delete(*args, **kwargs)
 
 
 
