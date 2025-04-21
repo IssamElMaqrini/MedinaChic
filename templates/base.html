@@ -11,13 +11,14 @@
 
 {% if user.is_authenticated %}
     {{ user.username }}
+    <a href="{% url 'profile' %}">Mon profile</a>
     <a href="{% url 'logout' %}">Se deconnecter</a>
 {% else %}
     <a href="{%  url 'login' %}">Connexion</a>
     <a href="{%  url 'signup' %}">S'inscrire</a>
 {% endif %}
 
-{% if user.cart %}
+{% if user.cart and not user.cart.ordered %}
     <p>
         <a href="{% url 'cart' %}">Voir le panier ({{ user.cart.orders.count }})</a>
     </p>

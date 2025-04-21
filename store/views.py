@@ -1,9 +1,16 @@
+from pprint import pprint
+
 import stripe
+from django.forms import modelformset_factory
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
 from MedinaChic import settings
+from accounts.models import Shopper, ShippingAddress
+from store.forms import OrderForm
 from store.models import Product, Cart, Order
 
 
@@ -32,21 +39,42 @@ def add_to_cart(request, slug):
 
 
 def cart(request):
-    cart = get_object_or_404(Cart, user=request.user)
-    return render(request, 'store/cart.html', context={'orders': cart.orders.all()})
+    orders = Order.objects.filter(user=request.user)
+    if orders.count() == 0:
+        return redirect('index')
+    OrderFormSet = modelformset_factory(Order, form=OrderForm, extra=0)
+    formset = OrderFormSet(queryset=orders)
+    return render(request, 'store/cart.html', context={"forms": formset})
+
+def update_quantities(request):
+    OrderFormSet = modelformset_factory(Order, form=OrderForm, extra=0)
+    formset = OrderFormSet(request.POST, queryset=Order.objects.filter(user=request.user))
+    if formset.is_valid():
+        formset.save()
+
+    return redirect('cart')
 
 def create_checkout_session(request):
     cart = request.user.cart
 
     line_items = [{"price": order.product.stripe_id,
                    "quantity": order.quantity}for order in cart.orders.all()]
-    session = stripe.checkout.Session.create(
-        line_items= line_items,
-        mode='payment',
-        locale='fr',
-        success_url=request.build_absolute_uri(reverse('checkout-success')),
-        cancel_url='http://127.0.0.1:8000/',
-    )
+
+    checkout_data = {
+        "line_items": line_items,
+        "mode": 'payment',
+        "locale": 'fr',
+        "shipping_address_collection": {"allowed_countries": ["BE"]},
+        "success_url": request.build_absolute_uri(reverse('checkout-success')),
+        "cancel_url": 'http://127.0.0.1:8000/',
+    }
+
+    if request.user.stripe_id:
+        checkout_data["customer"] = request.user.stripe_id
+    else:
+        checkout_data["customer_email"] = request.user.email
+
+    session = stripe.checkout.Session.create(**checkout_data)
     return redirect(session.url, code=303)
 
 def checkout_success(request):
@@ -57,6 +85,63 @@ def delete_cart(request):
         cart.delete()
 
     return redirect('index')
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    endpoint_secret = "whsec_e306f9c396be9a79003338f10bcdb0977cec6abb8114ab52afacd198e1202314"
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        return HttpResponse(status=400)
+
+    if event['type'] == 'checkout.session.completed':
+        data = event['data']['object']
+        try:
+            user = get_object_or_404(Shopper, email=data['customer_details']['email'])
+
+        except KeyError:
+            return HttpResponse("invalid customer email", status=404)
+        complete_order(data=data, user=user)
+        save_shipping_address(data=data, user=user)
+        return HttpResponse(status=200)
+
+    return HttpResponse(status=200)
+
+def complete_order(data, user):
+    user.stripe_id=data['customer']
+    user.cart.delete()
+    user.save()
+    return HttpResponse(status=200)
+
+def save_shipping_address(data, user):
+    try:
+        address = data['shipping']["address"]
+        name = data['shipping']["name"]
+        city=address["city"]
+        country=address["country"]
+        line1=address["line1"]
+        line2=address["line2"]
+        zip_code=address["postal_code"]
+    except KeyError:
+        return HttpResponse(status=400)
+
+    ShippingAddress.objects.get_or_create(user=user,
+                                          name=name,
+                                          city=city,
+                                          country=country.lower(),
+                                          address=line1,
+                                          address2=line2 or "",
+                                          zip_code=zip_code)
+
+    return HttpResponse(status=200)
 
 
 
