@@ -1,28 +1,101 @@
 {% extends 'base.html' %}
+
 {% block content %}
+    <style>
+        h1, h2 {
+            color: #872D37;
+            font-family: 'Yeseva One', serif;
+        }
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
+        .form-section {
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: auto auto 3rem auto;
+        }
 
-        {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+        form label {
+            font-weight: bold;
+            color: #872D37;
+            display: block;
+            margin-bottom: 0.2rem;
+            text-align: left;
+        }
 
-        <button type="submit">Sauvegarder</button>
-    </form>
+        form input[type="text"],
+        form input[type="email"],
+        form input[type="number"],
+        form select,
+        form textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #fdf8f2;
+            font-size: 1rem;
+        }
+
+        .styled-btn {
+            border: 2px solid #872D37;
+            color: #872D37;
+            padding: 0.5rem 1.2rem;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            background-color: transparent;
+            font-weight: bold;
+        }
+
+        .styled-btn:hover {
+            background-color: #872D37;
+            color: #C78C3A;
+        }
+
+        .message-list {
+            list-style-type: none;
+            padding: 0;
+            color: #872D37;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .address-block {
+            background-color: rgba(199, 140, 58, 0.1);
+            border-left: 4px solid #C78C3A;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+
+    <div class="form-section text-center">
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            {% if messages %}
+                <ul class="message-list">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <button type="submit" class="styled-btn mt-3">Sauvegarder</button>
+        </form>
+    </div>
+
     {% if addresses %}
-        <h1>Address de livraison</h1>
+        <h1 class="text-center mb-4">Adresse de livraison</h1>
+        {% for address in addresses %}
+            <div class="address-block">
+                {% include 'accounts/address.html' %}
+            </div>
+        {% endfor %}
     {% endif %}
-    
-    {% for address in addresses %}
-
-        {% include 'accounts/address.html' %}
-
-    {%  endfor %}
-
-{%  endblock %}
+{% endblock %}

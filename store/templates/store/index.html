@@ -1,10 +1,44 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <style>
+        .product-block {
+            margin-bottom: 3rem; /* espace entre les articles */
+        }
 
-{% for product in products %}
-    <h2>{{ product.name }}</h2>
-    <img src="{{ product.thumbnail.url }}" alt="{{ product.name }}">
-    <a href="{{ product.get_absolute_url }}">Voir l'article</a>
-{% endfor %}
+        .product-title {
+            color: #872D37;
+        }
+
+        .product-image {
+            width: 100%;
+            max-width: 450px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .btn-outline-dark {
+        border-color: #872D37;
+        color: #872D37;
+        }
+
+        .btn-outline-dark:hover {
+            background-color: #872D37;
+            color: #C78C3A;
+            border-color: #C78C3A;
+        }
+    </style>
+
+    <div class="row">
+        {% for product in products %}
+            <div class="col-12 product-block text-center">
+                <h2 class="product-title">{{ product.name }}</h2>
+                <img src="{{ product.thumbnail_url }}" alt="{{ product.name }}" class="product-image mb-3">
+                <div>
+                    <a href="{{ product.get_absolute_url }}" class="btn btn-outline-dark">Voir l'article</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
+

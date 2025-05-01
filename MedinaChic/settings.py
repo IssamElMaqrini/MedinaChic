@@ -134,3 +134,10 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / 'media'
 AUTH_USER_MODEL = 'accounts.Shopper'
 STRIPE_API_KEY = env("STRIPE_API_KEY")
+
+
+STATICFILES_DIRS = [
+    BASE_DIR / "MedinaChic/static"
+]
+
+LOGIN_URL = "/account/login/"
