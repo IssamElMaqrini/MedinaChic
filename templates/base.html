@@ -30,7 +30,7 @@
             z-index: -1;
         }
 
-        h1, h2, h3, h4, h5, h6 {
+        h1, h2, h3, h4, h5, h6, p {
             font-family: 'Yeseva One', serif;
         }
 
@@ -45,6 +45,22 @@
         .navbar-custom .nav-link:hover {
             color: #C78C3A !important;
         }
+        
+        .dropdown-menu {
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 3px solid #C78C3A;
+        }
+        
+        .dropdown-item {
+            color: #872D37;
+            font-weight: 500;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #872D37;
+            color: #C78C3A;
+        }
+
     </style>
 </head>
 <body class="py-4">
@@ -69,16 +85,40 @@
 
                 <div class="collapse navbar-collapse justify-content-center" id="navbarContent">
                     <ul class="navbar-nav mb-2 mb-lg-0 d-flex justify-content-center gap-3">
-                        {% if user.is_authenticated %}
                             <li class="nav-item">
-                                <span class="nav-link disabled">Bienvenue, {{ user.username }}</span>
+                                <a class="nav-link" href="{% url 'index' %}">Accueil</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'apropos' %}">A propos</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    Catégories
+                                </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="{% url 'index' %}">Tout</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'accessoire' %}">Accessoire</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'alimentaire' %}">Alimentaire</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'argile' %}">Argile</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'cuisine' %}">Cuisine</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'maroquineire' %}">Maroquineire</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'tissu' %}">Tissu</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'vetement' %}">Vetement</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'autre' %}">Autre</a></li>
+                                    </ul>
+                            </li>
+                        {% if user.is_authenticated %}
+                            <!--<li class="nav-item">
+                                <span class="nav-link disabled">Bienvenue, {{ user.username }}</span>
+                            </li>-->
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'profile' %}">Mon profil</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-danger" href="{% url 'logout' %}">Se déconnecter</a>
                             </li>
+                            
                         {% else %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'login' %}">Connexion</a>
@@ -92,10 +132,23 @@
                                 <a class="nav-link" href="{% url 'cart' %}">Voir le panier ({{ user.cart.orders.count }})</a>
                             </li>
                         {% endif %}
+                        <li class="nav-item">
+                                <a class="nav-link" href="{% url 'index' %}">Nederlands</a>
+                        </li>
                     </ul>
                 </div>
             </div>
         </nav>
+        {% if selected_category %}
+            <div class="text-center mb-4 mt-3 py-2 px-3 rounded" style="
+                background-color: rgba(245, 240, 231, 0.6); 
+                display: inline-block;
+            ">
+                <h2 style="color:#872D37; margin: 0;">Produits dans la catégorie : {{ selected_category|title }}</h2>
+            </div>
+        {% endif %}
+
+
     </div>
 
     <!-- Contenu principal -->

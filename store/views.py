@@ -139,5 +139,12 @@ def save_shipping_address(data, user):
     return HttpResponse(status=200)
 
 
+def apropos(request):
+    return render(request, 'store/apropos.html')
+
+
+def produits_par_categorie(request, category):
+    products = Product.objects.filter(category=category)
+    return render(request, 'store/index.html', {'products': products, 'selected_category': category})
 
 

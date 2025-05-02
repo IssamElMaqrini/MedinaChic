@@ -10,6 +10,17 @@ from MedinaChic.settings import AUTH_USER_MODEL
 class Product(models.Model):
     name = models.CharField(max_length=128)
     slug = models.SlugField(max_length=128, blank=True)
+    CATEGORIES = [
+        ('autre', 'Autre'),
+        ('cuisine', 'Cuisine'),
+        ('vetement', 'Vetement'),
+        ('tissu', 'Tissu'),
+        ('argile', 'Argile'),
+        ('maroquineire', 'Maroquineire'),
+        ('alimentaire', 'Alimentaire'),
+        ('accessoire', 'Accessoire'),
+    ]
+    category = models.CharField(max_length=50, choices=CATEGORIES, default='autre')
     price = models.FloatField(default=0.0)
     quantity = models.IntegerField(default=0)
     description = models.TextField(blank=True)
