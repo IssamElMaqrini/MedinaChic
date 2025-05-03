@@ -1,0 +1,68 @@
+{% extends 'base_nl.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .apropos-section {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 2rem;
+        padding: 2rem;
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .apropos-text {
+        flex: 1;
+        background-color: rgba(199, 140, 58, 0.15);
+        padding: 1.5rem;
+        border-radius: 12px;
+        color: #872D37;
+        font-size: 1.1rem;
+        line-height: 1.7;
+        min-width: 300px;
+        max-width: 600px;
+    }
+
+    .apropos-text h2 {
+        font-family: 'Yeseva One', serif;
+        color: #C78C3A;
+        margin-bottom: 1rem;
+    }
+
+    .apropos-img {
+        max-width: 400px;
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        object-fit: cover;
+    }
+
+    @media (max-width: 768px) {
+        .apropos-section {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
+
+<div class="container my-5">
+    <div class="apropos-section">
+        <div class="apropos-text">
+            <h2>Ons verhaal</h2>
+            <p>
+                Welkom bij <strong>MedinaChic</strong>, een boetiek gewijd aan de ambachtelijke elegantie van Marokko.
+                Onze missie is om het eeuwenoude vakmanschap van Marokkaanse ambachtslieden te laten stralen via unieke, authentieke en ethische creaties.
+            </p>
+            <p>
+                Elk stuk dat u hier ontdekt, is het resultaat van gepassioneerd vakmanschap, geïnspireerd door de zelliges van Fez, de steegjes van Marrakech en de kleuren
+                van de woestijn. Of het nu is om cadeau te doen of om uw interieur te verfraaien, wij geloven dat ambacht een verhaal vertelt: het uwe, en dat van de handen
+                die het hebben gevormd.
+            </p>
+        </div>
+        <img src="{% static 'img/logo-rouge.jpg' %}" alt="Artisan marocain" class="apropos-img">
+    </div>
+</div>
+{% endblock %}

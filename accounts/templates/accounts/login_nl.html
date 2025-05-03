@@ -1,0 +1,69 @@
+{% extends 'base_nl.html' %}
+{% block content %}
+    <style>
+        h1 {
+            color: #872D37;
+            font-family: 'Yeseva One', serif;
+            margin-bottom: 2rem;
+        }
+
+        .form-section {
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        label {
+            font-weight: bold;
+            color: #872D37;
+            display: block;
+            margin-bottom: 0.3rem;
+            text-align: left;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #fdf8f2;
+            font-size: 1rem;
+        }
+
+        .styled-btn {
+            border: 2px solid #872D37;
+            color: #872D37;
+            padding: 0.5rem 1.2rem;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            background-color: transparent;
+            font-weight: bold;
+        }
+
+        .styled-btn:hover {
+            background-color: #872D37;
+            color: #C78C3A;
+        }
+    </style>
+
+    <div class="form-section text-center">
+        <h1>Inloggen</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <p>
+                <label for="username">Gebruikersnaam</label>
+                <input id="username" type="text" name="username" required>
+            </p>
+            <p>
+                <label for="password">Wachtwoord</label>
+                <input id="password" type="password" name="password" required>
+            </p>
+            <button type="submit" class="styled-btn">Inloggen</button>
+        </form>
+    </div>
+{% endblock %}

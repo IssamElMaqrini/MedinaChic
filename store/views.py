@@ -147,4 +147,29 @@ def produits_par_categorie(request, category):
     products = Product.objects.filter(category=category)
     return render(request, 'store/index.html', {'products': products, 'selected_category': category})
 
+def index_nl(request):
+    products = Product.objects.all()
+    return render(request, 'store/index_nl.html', {'products': products, 'lang': 'nl'})
 
+def product_detail_nl(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+    return render(request, 'store/detail_nl.html', context={'product': product, 'lang': 'nl'})
+
+def apropos_nl(request):
+    return render(request, 'store/apropos_nl.html')
+
+@login_required
+def cart_nl(request):
+    orders = Order.objects.filter(user=request.user)
+    if orders.count() == 0:
+        return redirect('index-nl')  # redirige vers la page d'accueil NL si panier vide
+
+    OrderFormSet = modelformset_factory(Order, form=OrderForm, extra=0)
+    formset = OrderFormSet(queryset=orders)
+
+    return render(request, 'store/cart_nl.html', context={"forms": formset})
+
+
+def produits_par_categorie_nl(request, category):
+    products = Product.objects.filter(category=category)
+    return render(request, 'store/index_nl.html', {'products': products, 'selected_category': category})

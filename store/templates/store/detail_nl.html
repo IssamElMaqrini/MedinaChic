@@ -1,0 +1,70 @@
+{% extends 'base_nl.html' %}
+
+{% block content %}
+    <style>
+        .product-title {
+            color: #872D37;
+        }
+
+        .product-price {
+            color: #C78C3A;
+            font-weight: bold;
+        }
+
+        .product-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .add-to-cart-btn {
+            border: 2px solid  #872D37;
+            color:  #872D37;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #872D37;
+            color: #C78C3A;
+        }
+
+        .product-description {
+            color: #872D37;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .product-description {
+            color: #872D37;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            background-color: rgba(199, 140, 58, 0.15); /* doré translucide */
+            padding: 1rem;
+            border-radius: 8px;
+            display: inline-block;
+            max-width: 600px;
+        }
+    </style>
+
+    <div class="text-center">
+        <h2 class="product-title">{{ product.name_nl }}</h2>
+        <h3 class="product-price">€{{ product.price }}</h3>
+        <img src="{{ product.thumbnail.url }}" alt="{{ product.name_nl }}" class="product-image mb-4">
+        <p class="product-description">{{ product.description_nl }}</p>
+        <p>{{ product.quantity }} en stock</p>
+
+        {% if user.is_authenticated %}
+            <p>
+                <a href="{% url 'add-to-cart' product.slug %}" class="add-to-cart-btn">
+                    Toevoegen aan winkelwagen
+                </a>
+            </p>
+        {% endif %}
+    </div>
+{% endblock %}

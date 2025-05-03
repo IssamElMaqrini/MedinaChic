@@ -1,0 +1,44 @@
+{% extends 'base_nl.html' %}
+
+{% block content %}
+    <style>
+        .product-block {
+            margin-bottom: 3rem; /* espace entre les articles */
+        }
+
+        .product-title {
+            color: #872D37;
+        }
+
+        .product-image {
+            width: 100%;
+            max-width: 450px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .btn-outline-dark {
+        border-color: #872D37;
+        color: #872D37;
+        }
+
+        .btn-outline-dark:hover {
+            background-color: #872D37;
+            color: #C78C3A;
+            border-color: #C78C3A;
+        }
+    </style>
+
+    <div class="row">
+        {% for product in products %}
+            <div class="col-12 product-block text-center">
+                <h2 class="product-title">{{ product.name_nl }}</h2>
+                <img src="{{ product.thumbnail_url }}" alt="{{ product.name_nl }}" class="product-image mb-3">
+                <div>
+                    <a href="{% url 'product-nl' product.slug %}" class="btn btn-outline-dark">Artikel bekijken</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+

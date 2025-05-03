@@ -64,3 +64,51 @@ def delete_address(request, pk):
     address = get_object_or_404(ShippingAddress, pk=pk, user=request.user)
     address.delete()
     return redirect('profile')
+
+
+@login_required
+def profile_nl(request):
+    if request.method == 'POST':
+        is_valid = authenticate(email=request.POST.get("email"), password=request.POST.get("password"))
+        if is_valid:
+            user = request.user
+            user.first_name = request.POST.get("first_name")
+            user.last_name = request.POST.get("last_name")
+            user.save()
+        else:
+            messages.add_message(request, messages.ERROR, "Onjuist wachtwoord")  # en néerlandais
+
+        return redirect("profile-nl")
+
+    form = UserForm(initial=model_to_dict(request.user, exclude="password"))
+    addresses = request.user.addresses.all()
+
+    return render(request, 'accounts/profile_nl.html', context={'form': form,
+                                                                "addresses": addresses})
+
+
+def login_user_nl(request):
+    if request.method == 'POST':
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect('index-nl')  # redirection vers la page d'accueil NL
+
+    return render(request, 'accounts/login_nl.html')
+
+
+def logout_user_nl(request):
+    logout(request)
+    return redirect('index-nl')
+
+
+def signup_nl(request):
+    if request.method == 'POST':
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = User.objects.create_user(username=username, password=password)
+        login(request, user)
+        return redirect('index-nl')  # Redirige vers la page d'accueil en néerlandais
+    return render(request, 'accounts/signup_nl.html')

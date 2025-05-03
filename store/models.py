@@ -9,6 +9,7 @@ from MedinaChic.settings import AUTH_USER_MODEL
 
 class Product(models.Model):
     name = models.CharField(max_length=128)
+    name_nl = models.CharField(max_length=128, blank=True, null=True)
     slug = models.SlugField(max_length=128, blank=True)
     CATEGORIES = [
         ('autre', 'Autre'),
@@ -24,6 +25,7 @@ class Product(models.Model):
     price = models.FloatField(default=0.0)
     quantity = models.IntegerField(default=0)
     description = models.TextField(blank=True)
+    description_nl = models.TextField(blank=True, null=True)
     thumbnail = models.ImageField(upload_to="products/", blank=True, null=True)
     stripe_id = models.CharField(max_length=90, blank=True)
 
@@ -39,6 +41,8 @@ class Product(models.Model):
 
     def thumbnail_url(self):
         return self.thumbnail.url if self.thumbnail else static("img/logo-bleu.jpg")
+
+
 
 
 class Order(models.Model):

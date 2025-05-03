@@ -45,17 +45,17 @@
         .navbar-custom .nav-link:hover {
             color: #C78C3A !important;
         }
-
+        
         .dropdown-menu {
             background-color: rgba(255, 255, 255, 0.95);
             border: 3px solid #C78C3A;
         }
-
+        
         .dropdown-item {
             color: #872D37;
             font-weight: 500;
         }
-
+        
         .dropdown-item:hover {
             background-color: #872D37;
             color: #C78C3A;
@@ -69,7 +69,7 @@
     <div class="text-center mb-5">
         <div class="d-inline-block px-4 py-2 rounded" style="background-color: rgba(245, 240, 231, 0.6);">
             <a href="{% url 'index' %}" class="text-decoration-none">
-                <h1 style="color: #872D37;">Boutique MedinaChic</h1>
+                <h1 style="color: #872D37;">MedinaChic winkel</h1>
             </a>
         </div>
     </div>
@@ -86,26 +86,26 @@
                 <div class="collapse navbar-collapse justify-content-center" id="navbarContent">
                     <ul class="navbar-nav mb-2 mb-lg-0 d-flex justify-content-center gap-3">
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'index' %}">Accueil</a>
+                                <a class="nav-link" href="{% url 'index-nl' %}">Homepagina</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'apropos' %}">A propos</a>
+                                <a class="nav-link" href="{% url 'apropos-nl' %}">Over ons</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    Catégories
+                                    Categorieën
                                 </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{% url 'index' %}">Tout</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'accessoire' %}">Accessoire</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'alimentaire' %}">Alimentaire</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'argile' %}">Argile</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'cuisine' %}">Cuisine</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'maroquineire' %}">Maroquineire</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'tissu' %}">Tissu</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'vetement' %}">Vetement</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'products-by-category' 'autre' %}">Autre</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'index-nl' %}">Alles</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category-nl' 'accessoire' %}">Accessoire</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category-nl' 'alimentaire' %}">Voeding</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category-nl' 'argile' %}">Klei</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category-nl' 'cuisine' %}">Keuken</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category-nl' 'maroquineire' %}">Lederwaren</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category-nl' 'tissu' %}">Stof</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category-nl' 'vetement' %}">Kleding</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'products-by-category-nl' 'autre' %}">Andere</a></li>
                                     </ul>
                             </li>
                         {% if user.is_authenticated %}
@@ -113,40 +113,40 @@
                                 <span class="nav-link disabled">Bienvenue, {{ user.username }}</span>
                             </li>-->
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'profile' %}">Mon profil</a>
+                                <a class="nav-link" href="{% url 'profile-nl' %}">Mijn profiel</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-danger" href="{% url 'logout' %}">Se déconnecter</a>
+                                <a class="nav-link text-danger" href="{% url 'logout-nl' %}">Uitloggen</a>
                             </li>
-
+                            
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'login' %}">Connexion</a>
+                                <a class="nav-link" href="{% url 'login-nl' %}">Inloggen</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'signup' %}">S'inscrire</a>
+                                <a class="nav-link" href="{% url 'signup-nl' %}">Registreren</a>
                             </li>
                         {% endif %}
                         {% if user.cart and not user.cart.ordered %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'cart' %}">Voir le panier ({{ user.cart.orders.count }})</a>
+                                <a class="nav-link" href="{% url 'cart-nl' %}">Winkelwagen bekijken ({{ user.cart.orders.count }})</a>
                             </li>
                         {% endif %}
                         <li class="nav-item">
-                                <a class="nav-link" href="{% url 'index-nl' %}">Nederlands</a>
+                                <a class="nav-link" href="{% url 'index' %}">Francais</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
         {% if selected_category %}
-            <div class="text-center mb-4 mt-3 py-2 px-3 rounded" style="
-                background-color: rgba(245, 240, 231, 0.6);
+           <!-- <div class="text-center mb-4 mt-3 py-2 px-3 rounded" style="
+                background-color: rgba(245, 240, 231, 0.6); 
                 display: inline-block;
             ">
                 <h2 style="color:#872D37; margin: 0;">Produits dans la catégorie : {{ selected_category|title }}</h2>
-            </div>
-        {% endif %}
+            </div> -->
+        {% endif %} 
 
 
     </div>
