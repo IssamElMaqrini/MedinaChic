@@ -1,7 +1,7 @@
 from django.urls import path
 from store.views import index, product_detail, add_to_cart, cart, delete_cart, create_checkout_session, \
     checkout_success, stripe_webhook, update_quantities, apropos, produits_par_categorie, product_detail_nl, apropos_nl, \
-    cart_nl, produits_par_categorie_nl
+    cart_nl, produits_par_categorie_nl, api_products
 
 urlpatterns = [
     path('cart/', cart, name="cart"),
@@ -18,4 +18,5 @@ urlpatterns = [
     path('product/<str:slug>/add-to-cart/', add_to_cart, name="add-to-cart"),
     path('categorie/<str:category>/', produits_par_categorie, name='products-by-category'),
     path('nl/categorie/<str:category>/', produits_par_categorie_nl, name='products-by-category-nl'),
+    path('api/products/', api_products, name='api-products'),
 ]

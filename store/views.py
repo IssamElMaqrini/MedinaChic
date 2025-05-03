@@ -13,6 +13,9 @@ from MedinaChic import settings
 from accounts.models import Shopper, ShippingAddress
 from store.forms import OrderForm
 from store.models import Product, Cart, Order
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import ProductSerializer
 
 
 stripe.api_key = settings.STRIPE_API_KEY
@@ -173,3 +176,10 @@ def cart_nl(request):
 def produits_par_categorie_nl(request, category):
     products = Product.objects.filter(category=category)
     return render(request, 'store/index_nl.html', {'products': products, 'selected_category': category})
+
+
+@api_view(['GET'])
+def api_products(request):
+    products = Product.objects.all()
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
