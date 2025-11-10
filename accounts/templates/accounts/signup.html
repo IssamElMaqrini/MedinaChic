@@ -55,9 +55,10 @@
         <h1>S'inscrire</h1>
         <form method="POST">
             {% csrf_token %}
+
             <p>
-                <label for="username">Nom d'utilisateur</label>
-                <input id="username" type="text" name="username" required>
+                <label for="email">Adresse email</label>
+                <input id="email" type="text" name="email" required>
             </p>
             <p>
                 <label for="password">Mot de passe</label>
