@@ -116,6 +116,9 @@
                                 <a class="nav-link" href="{% url 'profile-nl' %}">Mijn profiel</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" href="{% url 'order-history-nl' %}">Mijn bestellingen</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link text-danger" href="{% url 'logout-nl' %}">Uitloggen</a>
                             </li>
                             
@@ -127,9 +130,9 @@
                                 <a class="nav-link" href="{% url 'signup-nl' %}">Registreren</a>
                             </li>
                         {% endif %}
-                        {% if user.cart and not user.cart.ordered %}
+                        {% if has_cart %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'cart-nl' %}">Winkelwagen bekijken ({{ user.cart.orders.count }})</a>
+                                <a class="nav-link" href="{% url 'cart-nl' %}">Winkelwagen bekijken ({{ cart_count }})</a>
                             </li>
                         {% endif %}
                         <li class="nav-item">

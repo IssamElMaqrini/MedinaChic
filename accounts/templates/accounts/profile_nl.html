@@ -92,4 +92,37 @@
             <button type="submit" class="styled-btn mt-3">Inschrijven</button>
         </form>
     </div>
+
+    <!-- Delete Account Section -->
+    <div class="form-section text-center mt-5" style="border: 2px solid #dc3545;">
+        <h2 class="text-danger mb-3">Gevaarlijke Zone</h2>
+        <p style="color: #872D37;">Zodra uw account is verwijderd, worden al uw gegevens permanent gewist.</p>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+            Verwijder mijn account
+        </button>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteAccountModalLabel">Bevestig accountverwijdering</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: #872D37;"><strong>Waarschuwing!</strong> Deze actie kan niet ongedaan worden gemaakt. Al uw gegevens, bestellingen en adressen worden permanent verwijderd.</p>
+                    <form method="POST" action="{% url 'delete-account-nl' %}" id="deleteAccountForm">
+                        {% csrf_token %}
+                        <label for="password" style="color: #872D37;">Voer uw wachtwoord in om te bevestigen:</label>
+                        <input type="password" name="password" id="password" class="form-control" required>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                    <button type="submit" form="deleteAccountForm" class="btn btn-danger">Permanent verwijderen</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

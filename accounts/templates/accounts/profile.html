@@ -98,4 +98,37 @@
             </div>
         {% endfor %}
     {% endif %}
+
+    <!-- Delete Account Section -->
+    <div class="form-section text-center mt-5" style="border: 2px solid #dc3545;">
+        <h2 class="text-danger mb-3">Action Irréversible</h2>
+        <p style="color: #872D37;">Une fois votre compte supprimé, toutes vos données seront définitivement effacées.</p>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+            Supprimer mon compte
+        </button>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteAccountModalLabel">Confirmer la suppression du compte</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: #872D37;"><strong>Attention !</strong> Cette action est irréversible. Toutes vos données, commandes et adresses seront définitivement supprimées.</p>
+                    <form method="POST" action="{% url 'delete-account' %}" id="deleteAccountForm">
+                        {% csrf_token %}
+                        <label for="password" style="color: #872D37;">Entrez votre mot de passe pour confirmer :</label>
+                        <input type="password" name="password" id="password" class="form-control" required>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" form="deleteAccountForm" class="btn btn-danger">Supprimer définitivement</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -3,19 +3,30 @@ from django.contrib.auth import get_user_model, login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.forms import model_to_dict
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import IntegrityError
 
 from accounts.forms import UserForm
 from accounts.models import ShippingAddress
 
 User = get_user_model()
 def signup(request):
+    error_message = None
     if request.method == 'POST':
         email = request.POST.get("email")
         password = request.POST.get("password")
-        user = User.objects.create_user(email=email, password=password)
-        login(request, user)
-        return redirect('index')
-    return render(request, 'accounts/signup.html')
+        
+        try:
+            # Check if user already exists
+            if User.objects.filter(email=email).exists():
+                error_message = "Cette adresse email est déjà utilisée. Veuillez vous connecter ou utiliser une autre adresse."
+            else:
+                user = User.objects.create_user(email=email, password=password)
+                login(request, user)
+                return redirect('index')
+        except IntegrityError:
+            error_message = "Cette adresse email est déjà utilisée. Veuillez vous connecter ou utiliser une autre adresse."
+    
+    return render(request, 'accounts/signup.html', {'error_message': error_message})
 
 
 def login_user(request):
@@ -105,10 +116,54 @@ def logout_user_nl(request):
 
 
 def signup_nl(request):
+    error_message = None
     if request.method == 'POST':
         email = request.POST.get("email")
         password = request.POST.get("password")
-        user = User.objects.create_user(email=email, password=password)
-        login(request, user)
-        return redirect('index-nl')  # Redirige vers la page d'accueil en néerlandais
-    return render(request, 'accounts/signup_nl.html')
+        
+        try:
+            # Check if user already exists
+            if User.objects.filter(email=email).exists():
+                error_message = "Dit e-mailadres is al in gebruik. Log in of gebruik een ander e-mailadres."
+            else:
+                user = User.objects.create_user(email=email, password=password)
+                login(request, user)
+                return redirect('index-nl')
+        except IntegrityError:
+            error_message = "Dit e-mailadres is al in gebruik. Log in of gebruik een ander e-mailadres."
+    
+    return render(request, 'accounts/signup_nl.html', {'error_message': error_message})
+
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        password = request.POST.get("password")
+        user = authenticate(email=request.user.email, password=password)
+        if user:
+            user.delete()
+            messages.success(request, "Votre compte a été supprimé avec succès.")
+            return redirect('index')
+        else:
+            messages.error(request, "Mot de passe incorrect. Impossible de supprimer le compte.")
+            return redirect('profile')
+    return redirect('profile')
+
+
+@login_required
+def delete_account_nl(request):
+    if request.method == 'POST':
+        password = request.POST.get("password")
+        user = authenticate(email=request.user.email, password=password)
+        if user:
+            user.delete()
+            messages.success(request, "Uw account is succesvol verwijderd.")
+            return redirect('index-nl')
+        else:
+            messages.error(request, "Onjuist wachtwoord. Kan account niet verwijderen.")
+            return redirect('profile-nl')
+    return redirect('profile-nl')
+
+
+
+

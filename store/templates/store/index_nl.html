@@ -2,43 +2,212 @@
 
 {% block content %}
     <style>
-        .product-block {
-            margin-bottom: 3rem; /* espace entre les articles */
+        .search-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .product-title {
+        .search-input {
+            border: 2px solid #872D37;
+            border-radius: 25px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #C78C3A;
+            box-shadow: 0 0 0 0.2rem rgba(199, 140, 58, 0.25);
+        }
+
+        .search-btn {
+            background-color: #872D37;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            background-color: #C78C3A;
             color: #872D37;
+        }
+
+        .product-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
         }
 
         .product-image {
             width: 100%;
-            max-width: 450px;
-            height: 300px;
+            height: 200px;
             object-fit: cover;
             border-radius: 8px;
-        }
-        .btn-outline-dark {
-        border-color: #872D37;
-        color: #872D37;
+            margin-bottom: 1rem;
         }
 
-        .btn-outline-dark:hover {
-            background-color: #872D37;
+        .product-title {
+            color: #872D37;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            min-height: 2.4rem;
+        }
+
+        .product-price {
             color: #C78C3A;
-            border-color: #C78C3A;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-stock {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-stock.out-of-stock {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .product-actions {
+            margin-top: auto;
+        }
+
+        .btn-add-cart {
+            background-color: #872D37;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .btn-add-cart:hover:not(:disabled) {
+            background-color: #C78C3A;
+            color: #872D37;
+        }
+
+        .btn-add-cart:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-details {
+            background-color: transparent;
+            color: #872D37;
+            border: 2px solid #872D37;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .btn-details:hover {
+            background-color: #872D37;
+            color: white;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            background-color: rgba(199, 140, 58, 0.1);
+            border-radius: 10px;
+            color: #872D37;
         }
     </style>
 
+    <!-- Search Bar -->
+    <div class="search-container">
+        <form method="GET" action="{% url 'index-nl' %}" class="row g-3">
+            <div class="col-md-9">
+                <input type="text" name="search" class="form-control search-input" 
+                       placeholder="🔍 Zoek een product..." 
+                       value="{{ search_query|default:'' }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn search-btn w-100">Zoeken</button>
+            </div>
+        </form>
+    </div>
+
+    {% if search_query %}
+    <div class="alert" style="background-color: rgba(199, 140, 58, 0.2); border-left: 5px solid #C78C3A; color: #872D37;">
+        <strong>Resultaten voor:</strong> "{{ search_query }}" ({{ products|length }} product{{ products|length|pluralize:"en" }})
+    </div>
+    {% endif %}
+
+    <!-- Products Grid -->
+    {% if products %}
     <div class="row">
         {% for product in products %}
-            <div class="col-12 product-block text-center">
-                <h2 class="product-title">{{ product.name_nl }}</h2>
-                <img src="{{ product.thumbnail_url }}" alt="{{ product.name_nl }}" class="product-image mb-3">
-                <div>
-                    <a href="{% url 'product-nl' product.slug %}" class="btn btn-outline-dark">Artikel bekijken</a>
+            <div class="col-md-4 col-sm-6 mb-4">
+                <div class="product-card">
+                    <img src="{{ product.thumbnail_url }}" alt="{{ product.name_nl }}" class="product-image">
+                    <h3 class="product-title">{{ product.name_nl|default:product.name }}</h3>
+                    <div class="product-price">{{ product.price }}€</div>
+                    
+                    {% if product.quantity > 0 %}
+                        <div class="product-stock">✓ Op voorraad ({{ product.quantity }} beschikbaar)</div>
+                    {% else %}
+                        <div class="product-stock out-of-stock">✗ Uitverkocht</div>
+                    {% endif %}
+
+                    <div class="product-actions">
+                        {% if user.is_authenticated and product.quantity > 0 %}
+                            <form method="POST" action="{% url 'add-to-cart' product.slug %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-add-cart">
+                                    🛒 Toevoegen aan winkelwagen
+                                </button>
+                            </form>
+                        {% elif product.quantity == 0 %}
+                            <button class="btn btn-add-cart" disabled>Niet beschikbaar</button>
+                        {% else %}
+                            <a href="{% url 'login-nl' %}" class="btn btn-add-cart">
+                                Inloggen om te kopen
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'product-nl' product.slug %}" class="btn btn-details">
+                            Details bekijken
+                        </a>
+                    </div>
                 </div>
             </div>
         {% endfor %}
     </div>
+    {% else %}
+    <div class="no-results">
+        <h3>😔 Geen producten gevonden</h3>
+        <p>Probeer andere zoekwoorden of blader door al onze categorieën.</p>
+        {% if search_query %}
+        <a href="{% url 'index-nl' %}" class="btn btn-add-cart" style="width: auto; padding: 0.75rem 2rem;">
+            Alle producten bekijken
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
 {% endblock %}
-

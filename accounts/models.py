@@ -98,7 +98,7 @@ class ShippingAddress(models.Model):
         stripe.Customer.modify(
             self.user.stripe_id,
             shipping={"name": self.name,
-                      "address": {self.as_dict()}},
+                      "address": self.as_dict()},
             address=self.as_dict()
 
         )

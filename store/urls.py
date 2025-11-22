@@ -1,11 +1,13 @@
 from django.urls import path
 from store.views import index, product_detail, add_to_cart, cart, delete_cart, create_checkout_session, \
     checkout_success, stripe_webhook, update_quantities, apropos, produits_par_categorie, product_detail_nl, apropos_nl, \
-    cart_nl, produits_par_categorie_nl, api_products
+    cart_nl, produits_par_categorie_nl, api_products, order_history, order_history_nl, api_signup
 
 urlpatterns = [
     path('cart/', cart, name="cart"),
     path('nl/cart/', cart_nl, name='cart-nl'),
+    path('history/', order_history, name="order-history"),
+    path('nl/history/', order_history_nl, name='order-history-nl'),
     path('apropos/', apropos, name="apropos"),
     path('nl/overons', apropos_nl, name="apropos-nl"),
     path('cart/update_quantities/', update_quantities, name="update-quantities"),
@@ -19,4 +21,5 @@ urlpatterns = [
     path('categorie/<str:category>/', produits_par_categorie, name='products-by-category'),
     path('nl/categorie/<str:category>/', produits_par_categorie_nl, name='products-by-category-nl'),
     path('api/products/', api_products, name='api-products'),
+    path('api/signup/', api_signup, name='api-signup'),
 ]

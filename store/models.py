@@ -63,7 +63,7 @@ class Cart(models.Model):
 
 
     def __str__(self):
-        return self.user.username
+        return f"Cart for {self.user.email}"
 
     def delete(self, *args, **kwargs):
         for order in self.orders.all():
@@ -73,6 +73,34 @@ class Cart(models.Model):
 
         self.orders.clear()
         super().delete(*args, **kwargs)
+
+
+class OrderHistory(models.Model):
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='order_history')
+    order_date = models.DateTimeField(auto_now_add=True)
+    total_amount = models.FloatField(default=0.0)
+    stripe_session_id = models.CharField(max_length=255, blank=True)
+    
+    def __str__(self):
+        return f"Order by {self.user.email} on {self.order_date.strftime('%Y-%m-%d %H:%M')}"
+    
+    class Meta:
+        verbose_name_plural = "Order Histories"
+        ordering = ['-order_date']
+
+
+class OrderHistoryItem(models.Model):
+    order_history = models.ForeignKey(OrderHistory, on_delete=models.CASCADE, related_name='items')
+    product_name = models.CharField(max_length=128)
+    product_price = models.FloatField()
+    quantity = models.IntegerField()
+    product_thumbnail = models.CharField(max_length=255, blank=True, default='')
+    
+    def __str__(self):
+        return f"{self.product_name} x{self.quantity}"
+    
+    def subtotal(self):
+        return self.product_price * self.quantity
 
 
 
