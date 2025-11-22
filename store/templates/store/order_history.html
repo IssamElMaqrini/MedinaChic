@@ -31,6 +31,7 @@
                             <th>Prix unitaire</th>
                             <th>Quantité</th>
                             <th>Sous-total</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,6 +48,19 @@
                             <td>{{ item.product_price|floatformat:2 }}€</td>
                             <td>{{ item.quantity }}</td>
                             <td>{{ item.subtotal|floatformat:2 }}€</td>
+                            <td>
+                                {% if item.product_slug %}
+                                    {% if item.has_review %}
+                                        <a href="{% url 'add-review' item.product_slug %}" class="btn btn-sm" style="background-color: #C78C3A; color: white;">
+                                            ✏️ Modifier l'avis
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'add-review' item.product_slug %}" class="btn btn-sm" style="background-color: #872D37; color: white;">
+                                            ⭐ Donner un avis
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

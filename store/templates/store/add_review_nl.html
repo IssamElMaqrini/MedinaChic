@@ -1,0 +1,208 @@
+{% extends 'base_nl.html' %}
+
+{% block content %}
+<style>
+    .review-form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .product-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background-color: rgba(199, 140, 58, 0.1);
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .product-info img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .product-info h3 {
+        color: #872D37;
+        margin: 0;
+    }
+    
+    .rating-radio {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .rating-radio input[type="radio"] {
+        display: none;
+    }
+    
+    .rating-radio label {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    
+    .rating-radio input[type="radio"]:checked ~ label {
+        color: #C78C3A;
+    }
+    
+    .form-label {
+        color: #872D37;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-submit {
+        background-color: #872D37;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+    
+    .btn-submit:hover {
+        background-color: #C78C3A;
+        color: #872D37;
+    }
+    
+    .btn-cancel {
+        border: 2px solid #872D37;
+        color: #872D37;
+        padding: 0.75rem 2rem;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #872D37;
+        color: white;
+    }
+</style>
+
+<!-- Messages de notification -->
+{% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="review-form-container">
+    <h2 class="text-center mb-4" style="color: #872D37;">
+        {% if is_edit %}
+            Uw beoordeling wijzigen
+        {% else %}
+            Geef uw mening
+        {% endif %}
+    </h2>
+    
+    <div class="product-info">
+        <img src="{{ product.thumbnail_url }}" alt="{{ product.name_nl }}">
+        <div>
+            <h3>{{ product.name_nl }}</h3>
+            <p class="mb-0" style="color: #C78C3A; font-weight: bold;">{{ product.price }}€</p>
+        </div>
+    </div>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="mb-4">
+            <label class="form-label">Note *</label>
+            <div class="rating-radio">
+                {% for value, label in form.rating.field.choices %}
+                    <input type="radio" name="rating" id="rating_{{ value }}" value="{{ value }}" 
+                           {% if form.rating.value == value|stringformat:"s" %}checked{% endif %}>
+                    <label for="rating_{{ value }}">★</label>
+                {% endfor %}
+            </div>
+            {% if form.rating.errors %}
+                <div class="text-danger">{{ form.rating.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            <label for="{{ form.title.id_for_label }}" class="form-label">Titel van uw beoordeling *</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <div class="text-danger">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            <label for="{{ form.comment.id_for_label }}" class="form-label">Uw opmerking *</label>
+            {{ form.comment }}
+            {% if form.comment.errors %}
+                <div class="text-danger">{{ form.comment.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{% url 'product-nl' product.slug %}" class="btn-cancel">Annuleren</a>
+            <button type="submit" class="btn-submit">
+                {% if is_edit %}
+                    Beoordeling bijwerken
+                {% else %}
+                    Beoordeling publiceren
+                {% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Système d'étoiles : étoiles de 1 à 5 de gauche à droite
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingInputs = document.querySelectorAll('.rating-radio input[type="radio"]');
+    const ratingLabels = document.querySelectorAll('.rating-radio label');
+    
+    // Fonction pour mettre à jour l'affichage des étoiles
+    function updateStars() {
+        const checkedInput = document.querySelector('.rating-radio input[type="radio"]:checked');
+        
+        // Réinitialiser toutes les étoiles
+        ratingLabels.forEach(l => l.style.color = '#ddd');
+        
+        if (checkedInput) {
+            const checkedValue = parseInt(checkedInput.value);
+            // Illuminer les N premières étoiles de gauche à droite
+            for (let i = 0; i < checkedValue; i++) {
+                ratingLabels[i].style.color = '#C78C3A';
+            }
+        }
+    }
+    
+    // Gestion du clic sur chaque étoile
+    ratingLabels.forEach((label, index) => {
+        label.addEventListener('click', function() {
+            const radioId = label.getAttribute('for');
+            const radio = document.getElementById(radioId);
+            if (radio) {
+                radio.checked = true;
+                updateStars();
+            }
+        });
+    });
+    
+    // Initialiser l'affichage au chargement
+    updateStars();
+});
+</script>
+
+{% endblock %}

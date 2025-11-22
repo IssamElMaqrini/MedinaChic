@@ -41,12 +41,25 @@ class Shopper(AbstractUser):
 
     def add_to_cart(self, slug):
         product = get_object_or_404(Product, slug=slug)
+        
+        # Vérifier si le produit est en stock
+        if product.quantity <= 0:
+            return None
+        
         cart, _ = Cart.objects.get_or_create(user=self)
         order, created = Order.objects.get_or_create(user=self, ordered=False, product=product)
+        
         if created:
+            # Vérifier qu'il y a au moins 1 en stock
+            if product.quantity < 1:
+                order.delete()
+                return None
             cart.orders.add(order)
             cart.save()
         else:
+            # Vérifier que la quantité commandée + 1 ne dépasse pas le stock
+            if order.quantity >= product.quantity:
+                return None
             order.quantity += 1
             order.save()
 

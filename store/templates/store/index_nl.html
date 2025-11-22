@@ -137,7 +137,68 @@
             border-radius: 10px;
             color: #872D37;
         }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .stars-display {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .star-rating {
+            display: inline-flex;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .star-rating .star {
+            color: #ddd;
+            position: relative;
+        }
+
+        .star-rating .star.filled {
+            color: #C78C3A;
+        }
+
+        .star-rating .star.half::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            color: #C78C3A;
+            overflow: hidden;
+            width: 50%;
+        }
+
+        .rating-average {
+            color: #872D37;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .rating-count {
+            color: #666;
+            font-size: 0.85rem;
+        }
     </style>
+
+    <!-- Messages de notification -->
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     <!-- Search Bar -->
     <div class="search-container">
@@ -167,7 +228,30 @@
                 <div class="product-card">
                     <img src="{{ product.thumbnail_url }}" alt="{{ product.name_nl }}" class="product-image">
                     <h3 class="product-title">{{ product.name_nl|default:product.name }}</h3>
-                    <div class="product-price">{{ product.price }}€</div>
+                    
+                    {% if product.get_average_rating %}
+                    <div class="product-rating">
+                        <div class="stars-display">
+                            <div class="star-rating">
+                                {% with avg=product.get_average_rating %}
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= avg %}
+                                            <span class="star filled">★</span>
+                                        {% elif forloop.counter == avg|add:"1" and avg|floatformat:1|slice:"-1" != "0" %}
+                                            <span class="star half">★</span>
+                                        {% else %}
+                                            <span class="star">★</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                            <span class="rating-average">{{ product.get_average_rating|floatformat:1 }}</span>
+                        </div>
+                        <span class="rating-count">({{ product.get_rating_count }} beoordelingen)</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="product-price">€{{ product.price }}</div>
                     
                     {% if product.quantity > 0 %}
                         <div class="product-stock">✓ Op voorraad ({{ product.quantity }} beschikbaar)</div>

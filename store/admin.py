@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from store.models import Product, Order, Cart, OrderHistory, OrderHistoryItem
+from store.models import Product, Order, Cart, OrderHistory, OrderHistoryItem, ProductReview
 
 # Register your models here.
 admin.site.register(Product)
@@ -21,3 +21,25 @@ class OrderHistoryAdmin(admin.ModelAdmin):
     search_fields = ['user__email']
     inlines = [OrderHistoryItemInline]
     readonly_fields = ['order_date']
+
+
+@admin.register(ProductReview)
+class ProductReviewAdmin(admin.ModelAdmin):
+    list_display = ['product', 'user', 'rating', 'title', 'verified_purchase', 'created_at']
+    list_filter = ['rating', 'verified_purchase', 'created_at']
+    search_fields = ['product__name', 'user__email', 'title', 'comment']
+    readonly_fields = ['created_at', 'updated_at']
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Information du produit', {
+            'fields': ('product', 'user', 'verified_purchase')
+        }),
+        ('Évaluation', {
+            'fields': ('rating', 'title', 'comment')
+        }),
+        ('Dates', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )

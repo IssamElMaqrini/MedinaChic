@@ -1,4 +1,5 @@
 {% extends 'base_nl.html' %}
+{% load store_filters %}
 
 {% block content %}
     <style>
@@ -52,19 +53,138 @@
         }
     </style>
 
+    <!-- Messages de notification -->
+    {% if messages %}
+        <div class="container mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <div class="text-center">
         <h2 class="product-title">{{ product.name_nl }}</h2>
         <h3 class="product-price">€{{ product.price }}</h3>
         <img src="{{ product.thumbnail.url }}" alt="{{ product.name_nl }}" class="product-image mb-4">
         <p class="product-description">{{ product.description_nl }}</p>
-        <p>{{ product.quantity }} en stock</p>
+        
+        {% if product.quantity > 0 %}
+            <p class="text-success fw-bold">✓ {{ product.quantity }} op voorraad</p>
+        {% else %}
+            <p class="text-danger fw-bold">✗ Niet op voorraad</p>
+        {% endif %}
 
         {% if user.is_authenticated %}
-            <p>
-                <a href="{% url 'add-to-cart' product.slug %}" class="add-to-cart-btn">
-                    Toevoegen aan winkelwagen
-                </a>
-            </p>
+            {% if product.quantity > 0 %}
+                <p>
+                    <a href="{% url 'add-to-cart' product.slug %}" class="add-to-cart-btn">
+                        Toevoegen aan winkelwagen
+                    </a>
+                </p>
+            {% else %}
+                <p>
+                    <button class="add-to-cart-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                        Product niet beschikbaar
+                    </button>
+                </p>
+            {% endif %}
         {% endif %}
+    </div>
+
+    <!-- Section des avis -->
+    <div class="mt-5" style="max-width: 1000px; margin-left: auto; margin-right: auto;">
+        <div style="background-color: rgba(255, 255, 255, 0.95); padding: 2rem; border-radius: 10px;">
+            <h3 style="color: #872D37; margin-bottom: 1.5rem;">Klantbeoordelingen</h3>
+            
+            {% if product.get_rating_count > 0 %}
+                <!-- Résumé des notes -->
+                <div class="d-flex align-items-center gap-4 mb-4 p-3" style="background-color: rgba(199, 140, 58, 0.1); border-radius: 8px;">
+                    <div class="text-center">
+                        <div style="font-size: 3rem; font-weight: bold; color: #C78C3A;">
+                            {{ product.get_average_rating }}
+                        </div>
+                        <div style="color: #872D37; font-size: 1.5rem;">
+                            {% with stars=product.get_stars_display %}
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= stars.full %}
+                                        ★
+                                    {% elif forloop.counter == stars.full|add:1 and stars.half %}
+                                        ⯨
+                                    {% else %}
+                                        ☆
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        </div>
+                        <div style="color: #666;">
+                            {{ product.get_rating_count }} beoordelingen
+                        </div>
+                    </div>
+                    
+                    <!-- Distribution des notes -->
+                    <div class="flex-grow-1">
+                        {% with distribution=product.get_rating_distribution %}
+                            {% for rating in "54321" %}
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span style="color: #872D37; min-width: 60px;">{{ rating }} ★</span>
+                                    <div class="progress flex-grow-1" style="height: 20px;">
+                                        {% with count=distribution|get_item:rating|default:0 %}
+                                            {% widthratio count product.get_rating_count 100 as percentage %}
+                                            <div class="progress-bar" style="width: {{ percentage }}%; background-color: #C78C3A;" role="progressbar"></div>
+                                        {% endwith %}
+                                    </div>
+                                    <span style="color: #666; min-width: 30px;">{{ distribution|get_item:rating|default:0 }}</span>
+                                </div>
+                            {% endfor %}
+                        {% endwith %}
+                    </div>
+                </div>
+                
+                <!-- Liste des avis -->
+                <div class="mt-4">
+                    {% for review in product.reviews.all %}
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <div style="color: #C78C3A; font-size: 1.2rem;">
+                                        {{ review.get_stars_display }}
+                                    </div>
+                                    <strong style="color: #872D37;">{{ review.title }}</strong>
+                                    {% if review.verified_purchase %}
+                                        <span class="badge" style="background-color: #28a745; font-size: 0.7rem;">✓ Geverifieerde aankoop</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end">
+                                    <small style="color: #666;">{{ review.user.email|truncatechars:20 }}</small><br>
+                                    <small style="color: #999;">{{ review.created_at|date:"d/m/Y" }}</small>
+                                </div>
+                            </div>
+                            <p style="color: #333; margin-bottom: 0.5rem;">{{ review.comment }}</p>
+                            
+                            {% if user == review.user %}
+                                <div class="mt-2">
+                                    <a href="{% url 'add-review-nl' product.slug %}" class="btn btn-sm" style="background-color: #C78C3A; color: white;">
+                                        ✏️ Wijzigen
+                                    </a>
+                                    <a href="{% url 'delete-review' review.id %}" class="btn btn-sm btn-outline-danger" 
+                                       onclick="return confirm('Weet u zeker dat u deze beoordeling wilt verwijderen?');">
+                                        🗑️ Verwijderen
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4" style="background-color: rgba(199, 140, 58, 0.1); border-radius: 8px;">
+                    <p style="color: #872D37; font-size: 1.1rem; margin: 0;">
+                        Nog geen beoordelingen. Wees de eerste om uw mening te geven!
+                    </p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
