@@ -153,7 +153,8 @@ class Cart(models.Model):
 
 
 class OrderHistory(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='order_history')
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='order_history')
+    user_email = models.EmailField(max_length=254, blank=True)  # Pour garder l'email même après suppression
     order_date = models.DateTimeField(auto_now_add=True)
     total_amount = models.FloatField(default=0.0)
     stripe_session_id = models.CharField(max_length=255, blank=True)

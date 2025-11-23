@@ -3,8 +3,11 @@ from store.views import index, product_detail, add_to_cart, cart, delete_cart, c
     checkout_success, checkout_cancelled, stripe_webhook, update_quantities, apropos, produits_par_categorie, product_detail_nl, apropos_nl, \
     cart_nl, produits_par_categorie_nl, api_products, order_history, order_history_nl, api_signup, \
     add_review, add_review_nl, delete_review
+from store.admin_views import admin_dashboard, admin_dashboard_nl
 
 urlpatterns = [
+    path('admin-dashboard/', admin_dashboard, name="admin-dashboard"),
+    path('nl/admin-dashboard/', admin_dashboard_nl, name='admin-dashboard-nl'),
     path('cart/', cart, name="cart"),
     path('nl/cart/', cart_nl, name='cart-nl'),
     path('history/', order_history, name="order-history"),

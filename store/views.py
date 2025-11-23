@@ -270,6 +270,7 @@ def checkout_success(request):
                 # Create order history
                 order_history = OrderHistory.objects.create(
                     user=request.user,
+                    user_email=request.user.email,
                     total_amount=total,
                     stripe_session_id=request.GET.get('session_id', '')
                 )
@@ -348,6 +349,7 @@ def complete_order(data, user):
             # Create order history
             order_history = OrderHistory.objects.create(
                 user=user,
+                user_email=user.email,
                 total_amount=total,
                 stripe_session_id=data.get('id', '')
             )

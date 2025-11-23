@@ -1,0 +1,577 @@
+{% extends 'base_nl.html' %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #C78C3A;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #872D37;
+    }
+    
+    .stat-label {
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    .section-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        color: #872D37;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #C78C3A;
+    }
+    
+    .product-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .product-table th {
+        background-color: #872D37;
+        color: white;
+        padding: 1rem;
+        text-align: left;
+    }
+    
+    .product-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        color: #000;
+    }
+    
+    .product-table tr:hover {
+        background-color: rgba(199, 140, 58, 0.1);
+    }
+    
+    .stock-input {
+        width: 80px;
+        padding: 0.5rem;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    .btn-update {
+        background-color: #872D37;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-update:hover {
+        background-color: #C78C3A;
+    }
+    
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+    
+    .badge-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .badge-warning {
+        background-color: #ffc107;
+        color: #000;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #872D37;
+        background: white;
+        color: #872D37;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .filter-btn.active {
+        background: #872D37;
+        color: white;
+    }
+    
+    .deleted-user-card {
+        background: rgba(220, 53, 69, 0.05);
+        border-left: 4px solid #dc3545;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+    }
+    
+    .order-mini {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+        background: rgba(199, 140, 58, 0.1);
+        margin: 0.25rem 0;
+        border-radius: 3px;
+        color: #000;
+    }
+</style>
+
+<!-- Messages de notification -->
+{% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>🎯 Beheerders Dashboard</h1>
+        <p class="mb-0">Voorraadbeheer, bestellingen en accounts</p>
+    </div>
+    
+    <!-- Statistiques -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_orders }}</div>
+            <div class="stat-label">Totaal Bestellingen</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_revenue|floatformat:2 }}€</div>
+            <div class="stat-label">Omzet</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ out_of_stock.count }}</div>
+            <div class="stat-label">Uitverkocht</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ low_stock.count }}</div>
+            <div class="stat-label">Lage Voorraad (&lt;5)</div>
+        </div>
+    </div>
+    
+    <!-- Top Produits les Mieux Vendus -->
+    <div class="section-card">
+        <h2 class="section-title">🏆 Top 10 Bestverkochte Producten</h2>
+        {% if best_selling_products %}
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Rang</th>
+                        <th>Product</th>
+                        <th>Totaal Verkocht</th>
+                        <th>Huidige Prijs</th>
+                        <th>Huidige Voorraad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in best_selling_products %}
+                    <tr>
+                        <td><strong style="color: #C78C3A; font-size: 1.2rem;">#{{ forloop.counter }}</strong></td>
+                        <td>
+                            {% if product.slug %}
+                                <a href="{% url 'product-nl' product.slug %}" target="_blank" style="color: #872D37; text-decoration: none; font-weight: 600;">
+                                    {{ product.name }}
+                                </a>
+                            {% else %}
+                                <span style="color: #666; font-style: italic;">{{ product.name }} (verwijderd)</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span style="background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: bold;">
+                                {{ product.total_sold }} eenheden
+                            </span>
+                        </td>
+                        <td>
+                            {% if product.price != 'N/A' %}
+                                {{ product.price }}€
+                            {% else %}
+                                <span style="color: #999;">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if product.current_stock != 'N/A' %}
+                                {% if product.current_stock == 0 %}
+                                    <span class="badge badge-danger">{{ product.current_stock }}</span>
+                                {% elif product.current_stock < 5 %}
+                                    <span class="badge badge-warning">{{ product.current_stock }}</span>
+                                {% else %}
+                                    <span style="color: #28a745; font-weight: 600;">{{ product.current_stock }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span style="color: #999;">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #666;">Nog geen verkopen geregistreerd.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Graphiques Analytics -->
+    <div class="section-card">
+        <h2 class="section-title">📈 Statistieken & Analytics</h2>
+        
+        <!-- Évolution du chiffre d'affaires -->
+        <div style="margin-bottom: 3rem;">
+            <h3 style="color: #872D37; font-size: 1.2rem; margin-bottom: 1rem;">💰 Omzet Evolutie (Laatste 30 dagen)</h3>
+            <canvas id="revenueChart" style="max-height: 300px;"></canvas>
+        </div>
+        
+        <!-- Sélecteur de produit -->
+        <div style="margin-bottom: 2rem;">
+            <h3 style="color: #872D37; font-size: 1.2rem; margin-bottom: 1rem;">📊 Verkoop per Product</h3>
+            <form method="GET" style="display: flex; align-items: center; gap: 1rem;">
+                <label for="product_select" style="font-weight: 600;">Selecteer een product:</label>
+                <select name="product_id" id="product_select" onchange="this.form.submit()" style="padding: 0.5rem; border: 2px solid #872D37; border-radius: 5px; font-size: 1rem; min-width: 250px;">
+                    <option value="">-- Kies een product --</option>
+                    {% for product in products_list %}
+                        <option value="{{ product.id }}" {% if selected_product and selected_product.id == product.id %}selected{% endif %}>
+                            {{ product.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        
+        <!-- Graphique des ventes du produit sélectionné -->
+        {% if selected_product %}
+        <div>
+            <h4 style="color: #666; font-size: 1.1rem; margin-bottom: 1rem;">
+                Verkoop van <strong style="color: #872D37;">{{ selected_product.name }}</strong> (Laatste 30 dagen)
+            </h4>
+            <canvas id="productSalesChart" style="max-height: 300px;"></canvas>
+        </div>
+        {% else %}
+        <p style="color: #666; font-style: italic;">Selecteer een product om de verkoopgrafiek te zien.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Produits en rupture de stock -->
+    <div class="section-card">
+        <h2 class="section-title">⚠️ Uitverkochte Producten</h2>
+        {% if out_of_stock %}
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Categorie</th>
+                        <th>Prijs</th>
+                        <th>Huidige Voorraad</th>
+                        <th>Nieuwe Hoeveelheid</th>
+                        <th>Actie</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in out_of_stock %}
+                    <tr>
+                        <td><strong>{{ product.name }}</strong></td>
+                        <td>{{ product.category }}</td>
+                        <td>{{ product.price }}€</td>
+                        <td><span class="badge badge-danger">0</span></td>
+                        <td>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <input type="number" name="quantity" class="stock-input" min="0" value="10" required>
+                        </td>
+                        <td>
+                                <button type="submit" name="update_stock" class="btn-update">✓ Bijwerken</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #28a745;">✓ Geen uitverkochte producten</p>
+        {% endif %}
+    </div>
+    
+    <!-- Produits avec stock faible -->
+    <div class="section-card">
+        <h2 class="section-title">⚡ Lage Voorraad (Minder dan 5 eenheden)</h2>
+        {% if low_stock %}
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Categorie</th>
+                        <th>Prijs</th>
+                        <th>Huidige Voorraad</th>
+                        <th>Nieuwe Hoeveelheid</th>
+                        <th>Actie</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in low_stock %}
+                    <tr>
+                        <td><strong>{{ product.name }}</strong></td>
+                        <td>{{ product.category }}</td>
+                        <td>{{ product.price }}€</td>
+                        <td><span class="badge badge-warning">{{ product.quantity }}</span></td>
+                        <td>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <input type="number" name="quantity" class="stock-input" min="0" value="{{ product.quantity|add:"10" }}" required>
+                        </td>
+                        <td>
+                                <button type="submit" name="update_stock" class="btn-update">✓ Bijwerken</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #28a745;">✓ Alle producten hebben voldoende voorraad</p>
+        {% endif %}
+    </div>
+    
+    <!-- Commandes clients -->
+    <div class="section-card">
+        <h2 class="section-title">📦 Klantbestellingen</h2>
+        
+        <div class="filter-buttons">
+            <a href="?period=all" class="filter-btn {% if period_filter == 'all' %}active{% endif %}">Alle</a>
+            <a href="?period=today" class="filter-btn {% if period_filter == 'today' %}active{% endif %}">Vandaag</a>
+            <a href="?period=week" class="filter-btn {% if period_filter == 'week' %}active{% endif %}">7 dagen</a>
+            <a href="?period=month" class="filter-btn {% if period_filter == 'month' %}active{% endif %}">30 dagen</a>
+        </div>
+        
+        {% if orders %}
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Klant</th>
+                        <th>Bedrag</th>
+                        <th>Producten</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.order_date|date:"d/m/Y H:i" }}</td>
+                        <td>{{ order.user_email|default:"Account verwijderd" }}</td>
+                        <td><strong>{{ order.total_amount }}€</strong></td>
+                        <td>
+                            {% for item in order.items.all %}
+                                <div class="order-mini">
+                                    {{ item.product_name }} × {{ item.quantity }} ({{ item.product_price }}€)
+                                </div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Geen bestellingen voor deze periode.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Comptes supprimés -->
+    <div class="section-card">
+        <h2 class="section-title">🗑️ Verwijderde Accounts & Geschiedenis</h2>
+        {% if deleted_users_with_orders %}
+            {% for data in deleted_users_with_orders %}
+                <div class="deleted-user-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>{{ data.deleted_user.email }}</strong>
+                            <span style="color: #666; margin-left: 1rem;">
+                                Verwijderd op {{ data.deleted_user.deleted_at|date:"d/m/Y om H:i" }}
+                            </span>
+                        </div>
+                        <div>
+                            <strong style="color: #872D37;">Totaal uitgegeven: {{ data.total_spent }}€</strong>
+                            <span style="color: #666; margin-left: 0.5rem;">({{ data.orders.count }} bestelling{{ data.orders.count|pluralize:"en" }})</span>
+                        </div>
+                    </div>
+                    
+                    {% if data.orders %}
+                        <div style="margin-top: 1rem; padding-left: 1rem; border-left: 3px solid #C78C3A;">
+                            <strong style="color: #666;">Bestelgeschiedenis:</strong>
+                            {% for order in data.orders %}
+                                <div class="order-mini">
+                                    📅 {{ order.order_date|date:"d/m/Y" }} - 
+                                    💰 {{ order.total_amount }}€ - 
+                                    📦 {{ order.items.count }} product{{ order.items.count|pluralize:"en" }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #28a745;">✓ Geen verwijderde accounts</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Graphique du chiffre d'affaires
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: {{ revenue_labels|safe }},
+            datasets: [{
+                label: 'Omzet (€)',
+                data: {{ revenue_values|safe }},
+                borderColor: '#872D37',
+                backgroundColor: 'rgba(135, 45, 55, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#872D37',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            return 'Omzet: ' + context.parsed.y.toFixed(2) + '€';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '€';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Graphique des ventes par produit
+    {% if selected_product %}
+    const productCtx = document.getElementById('productSalesChart').getContext('2d');
+    new Chart(productCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ product_sales_labels|safe }},
+            datasets: [{
+                label: 'Verkochte Hoeveelheid',
+                data: {{ product_sales_values|safe }},
+                backgroundColor: 'rgba(199, 140, 58, 0.8)',
+                borderColor: '#C78C3A',
+                borderWidth: 2,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            if (Number.isInteger(value)) {
+                                return value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+</script>
+
+{% endblock %}

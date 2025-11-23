@@ -4,9 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.forms import model_to_dict
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import IntegrityError
+import json
 
 from accounts.forms import UserForm
-from accounts.models import ShippingAddress
+from accounts.models import ShippingAddress, DeletedUser
 
 User = get_user_model()
 def signup(request):
@@ -141,6 +142,16 @@ def delete_account(request):
         password = request.POST.get("password")
         user = authenticate(email=request.user.email, password=password)
         if user:
+            # Sauvegarder les données de l'utilisateur avant suppression
+            user_data = {
+                'email': user.email,
+                'date_joined': user.date_joined.isoformat() if hasattr(user, 'date_joined') else None,
+            }
+            DeletedUser.objects.create(
+                email=user.email,
+                deletion_reason="Demande de l'utilisateur",
+                user_data=user_data
+            )
             user.delete()
             messages.success(request, "Votre compte a été supprimé avec succès.")
             return redirect('index')
@@ -156,6 +167,16 @@ def delete_account_nl(request):
         password = request.POST.get("password")
         user = authenticate(email=request.user.email, password=password)
         if user:
+            # Sauvegarder les données de l'utilisateur avant suppression
+            user_data = {
+                'email': user.email,
+                'date_joined': user.date_joined.isoformat() if hasattr(user, 'date_joined') else None,
+            }
+            DeletedUser.objects.create(
+                email=user.email,
+                deletion_reason="Verzoek van de gebruiker",
+                user_data=user_data
+            )
             user.delete()
             messages.success(request, "Uw account is succesvol verwijderd.")
             return redirect('index-nl')

@@ -117,4 +117,22 @@ class ShippingAddress(models.Model):
         )
 
 
+class DeletedUser(models.Model):
+    """Modèle pour conserver l'historique des comptes supprimés"""
+    email = models.EmailField(max_length=254)
+    deleted_at = models.DateTimeField(auto_now_add=True)
+    deletion_reason = models.TextField(blank=True, null=True)
+    # On garde une référence JSON des données importantes
+    user_data = models.JSONField(default=dict, help_text="Données de l'utilisateur avant suppression")
+    
+    class Meta:
+        ordering = ['-deleted_at']
+        verbose_name = "Compte supprimé"
+        verbose_name_plural = "Comptes supprimés"
+    
+    def __str__(self):
+        return f"{self.email} (supprimé le {self.deleted_at.strftime('%d/%m/%Y')})"
+
+
+
 

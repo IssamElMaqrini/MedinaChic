@@ -51,6 +51,19 @@ class ProductReviewForm(forms.ModelForm):
     class Meta:
         model = ProductReview
         fields = ['rating', 'title', 'comment']
+
+
+class StockUpdateForm(forms.Form):
+    """Formulaire pour mettre à jour le stock d'un produit"""
+    product_id = forms.IntegerField(widget=forms.HiddenInput())
+    quantity = forms.IntegerField(
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'style': 'width: 100px;'
+        }),
+        label="Nouvelle quantité"
+    )
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
