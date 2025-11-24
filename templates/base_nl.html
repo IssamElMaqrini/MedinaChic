@@ -40,18 +40,32 @@
 
         .navbar-custom .nav-link {
             color: white !important;
+            font-size: 0.85rem;
+            padding: 0.5rem 0.6rem;
         }
 
         .navbar-custom .nav-link:hover {
             color: #C78C3A !important;
         }
-        
+
+        @media (max-width: 1200px) {
+            .navbar-custom .nav-link {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.4rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar-custom .nav-link {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+
         .dropdown-menu {
             background-color: rgba(255, 255, 255, 0.95);
             border: 3px solid #C78C3A;
-        }
-        
-        .dropdown-item {
+        }        .dropdown-item {
             color: #872D37;
             font-weight: 500;
         }
@@ -84,7 +98,7 @@
                 </button>
 
                 <div class="collapse navbar-collapse justify-content-center" id="navbarContent">
-                    <ul class="navbar-nav mb-2 mb-lg-0 d-flex justify-content-center gap-3">
+                    <ul class="navbar-nav mb-2 mb-lg-0 d-flex justify-content-center gap-1">
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'index-nl' %}">Homepagina</a>
                             </li>
@@ -117,6 +131,12 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'order-history-nl' %}">Mijn bestellingen</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'blog_list_nl' %}">📝 Blog</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'chat_list_nl' %}">💬 Berichten</a>
                             </li>
                             {% if user.is_superuser %}
                             <li class="nav-item">

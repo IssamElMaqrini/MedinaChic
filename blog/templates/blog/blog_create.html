@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Créer un article - Blog MedinaChic{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background-color: #872D37; color: white;">
+                    <h3 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Créer un nouvel article
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Titre FR -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Titre <span class="text-danger">*</span></label>
+                            <input type="text" name="title" id="title" class="form-control" placeholder="Le titre de votre article..." required>
+                        </div>
+                        
+                        <!-- Titre NL (optionnel) -->
+                        <div class="mb-3">
+                            <label for="title_nl" class="form-label">Titre (NL) <small class="text-muted">(optionnel)</small></label>
+                            <input type="text" name="title_nl" id="title_nl" class="form-control" placeholder="De titel van uw artikel...">
+                            <small class="form-text text-muted">Version néerlandaise du titre</small>
+                        </div>
+                        
+                        <!-- Image -->
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Image <small class="text-muted">(optionnel)</small></label>
+                            <input type="file" name="image" id="image" class="form-control" accept="image/*">
+                            <small class="form-text text-muted">Formats acceptés: JPG, PNG, GIF</small>
+                        </div>
+                        
+                        <!-- Contenu FR -->
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Contenu <span class="text-danger">*</span></label>
+                            <textarea name="content" id="content" class="form-control" rows="10" placeholder="Écrivez votre article ici..." required></textarea>
+                        </div>
+                        
+                        <!-- Contenu NL (optionnel) -->
+                        <div class="mb-3">
+                            <label for="content_nl" class="form-label">Contenu (NL) <small class="text-muted">(optionnel)</small></label>
+                            <textarea name="content_nl" id="content_nl" class="form-control" rows="10" placeholder="Schrijf uw artikel hier..."></textarea>
+                            <small class="form-text text-muted">Version néerlandaise du contenu</small>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Publier l'article
+                            </button>
+                            <a href="{% url 'blog_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle"></i>
+                <strong>Conseils:</strong>
+                <ul class="mb-0">
+                    <li>Choisissez un titre accrocheur et descriptif</li>
+                    <li>Structurez votre contenu avec des paragraphes clairs</li>
+                    <li>Une image pertinente rendra votre article plus attrayant</li>
+                    <li>La traduction néerlandaise est optionnelle mais recommandée</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

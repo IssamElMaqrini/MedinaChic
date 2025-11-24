@@ -1,0 +1,125 @@
+{% extends 'base_nl.html' %}
+{% load static %}
+
+{% block title %}Berichten - MedinaChic{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-chat-dots"></i> Mijn Gesprekken
+                        </h3>
+                        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#newChatModal">
+                            <i class="bi bi-plus-circle"></i> Nieuw gesprek
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    {% if conversation_data %}
+                        <div class="list-group list-group-flush">
+                            {% for data in conversation_data %}
+                                <a href="{% url 'chat_conversation_nl' data.other_user.id %}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <i class="bi bi-person-circle me-2" style="font-size: 2rem; color: #872D37;"></i>
+                                                <div>
+                                                    <h6 class="mb-0">{{ data.other_user.email }}</h6>
+                                                    {% if data.last_message %}
+                                                        <small class="text-muted">
+                                                            {{ data.last_message.content|truncatewords:8 }}
+                                                        </small>
+                                                    {% else %}
+                                                        <small class="text-muted">Geen berichten</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="text-end">
+                                            {% if data.last_message %}
+                                                <small class="text-muted d-block">
+                                                    {{ data.last_message.created_at|date:"d/m H:i" }}
+                                                </small>
+                                            {% endif %}
+                                            
+                                            {% if data.unread_count > 0 %}
+                                                <span class="badge bg-danger rounded-pill mt-1">
+                                                    {{ data.unread_count }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-chat-dots text-muted" style="font-size: 4rem;"></i>
+                            <p class="text-muted mt-3">U heeft momenteel geen gesprekken.</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newChatModal">
+                                <i class="bi bi-plus-circle"></i> Gesprek starten
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal voor nieuw gesprek -->
+<div class="modal fade" id="newChatModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #872D37; color: white;">
+                <h5 class="modal-title">Nieuw gesprek</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="userSearch" class="form-label">Gebruiker zoeken</label>
+                    <input type="text" id="userSearch" class="form-control" placeholder="Typ een e-mailadres...">
+                </div>
+                <div id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('userSearch').addEventListener('input', function(e) {
+    const query = e.target.value;
+    
+    if (query.length < 2) {
+        document.getElementById('searchResults').innerHTML = '';
+        return;
+    }
+    
+    fetch(`{% url 'user_search' %}?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (data.success && data.users.length > 0) {
+                resultsDiv.innerHTML = '<div class="list-group">' +
+                    data.users.map(user => 
+                        `<a href="/blog/nl/chat/${user.id}/" 
+                           class="list-group-item list-group-item-action">
+                            <i class="bi bi-person-circle me-2"></i> ${user.email}
+                        </a>`
+                    ).join('') +
+                '</div>';
+            } else {
+                resultsDiv.innerHTML = '<p class="text-muted">Geen gebruiker gevonden.</p>';
+            }
+        });
+});
+</script>
+{% endblock %}

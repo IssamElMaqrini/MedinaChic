@@ -1,0 +1,157 @@
+{% extends 'base_nl.html' %}
+{% load static %}
+
+{% block title %}Chat met {{ other_user.email }} - MedinaChic{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <!-- Chat Header -->
+                <div class="card-header" style="background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%); color: white;">
+                    <div class="d-flex align-items-center">
+                        <a href="{% url 'chat_list_nl' %}" class="text-white me-3">
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
+                        <i class="bi bi-person-circle me-2" style="font-size: 2rem;"></i>
+                        <div>
+                            <h5 class="mb-0">{{ other_user.email }}</h5>
+                            <small>Privégesprek</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Messages Area -->
+                <div class="card-body" id="messagesContainer" style="height: 500px; overflow-y: auto; background-color: #f8f9fa;">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="mb-3 {% if message.sender == user %}text-end{% endif %}">
+                                <div class="d-inline-block" style="max-width: 70%;">
+                                    <div class="p-2 rounded {% if message.sender == user %}bg-primary text-white{% else %}bg-white{% endif %}"
+                                         style="box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                        <p class="mb-1" style="white-space: pre-wrap;">{{ message.content }}</p>
+                                        <small class="{% if message.sender == user %}text-white-50{% else %}text-muted{% endif %}">
+                                            {{ message.created_at|date:"H:i" }}
+                                            {% if message.sender == user %}
+                                                {% if message.is_read %}
+                                                    <i class="bi bi-check-all"></i>
+                                                {% else %}
+                                                    <i class="bi bi-check"></i>
+                                                {% endif %}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-chat-dots" style="font-size: 3rem;"></i>
+                            <p class="mt-3">Geen berichten in dit gesprek.</p>
+                            <p>Stuur het eerste bericht!</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Message Input -->
+                <div class="card-footer bg-white">
+                    <form id="messageForm" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="hidden" id="recipientId" value="{{ other_user.id }}">
+                        <input type="text" id="messageInput" class="form-control" placeholder="Typ uw bericht..." required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Versturen
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Scroll to bottom of messages
+function scrollToBottom() {
+    const container = document.getElementById('messagesContainer');
+    container.scrollTop = container.scrollHeight;
+}
+
+// Initial scroll
+scrollToBottom();
+
+// Handle form submission
+document.getElementById('messageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const messageInput = document.getElementById('messageInput');
+    const recipientId = document.getElementById('recipientId').value;
+    const content = messageInput.value.trim();
+    
+    if (!content) return;
+    
+    // Get CSRF token
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Send message via AJAX
+    fetch("{% url 'send_message' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken
+        },
+        body: `recipient_id=${recipientId}&content=${encodeURIComponent(content)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Add message to the chat
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'mb-3 text-end';
+            messageDiv.innerHTML = `
+                <div class="d-inline-block" style="max-width: 70%;">
+                    <div class="p-2 rounded bg-primary text-white" style="box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        <p class="mb-1" style="white-space: pre-wrap;">${content}</p>
+                        <small class="text-white-50">
+                            ${data.created_at}
+                            <i class="bi bi-check"></i>
+                        </small>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            
+            // Clear input and scroll
+            messageInput.value = '';
+            scrollToBottom();
+        } else {
+            alert('Fout bij het verzenden van bericht: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Fout bij het verzenden van bericht');
+    });
+});
+</script>
+
+<style>
+#messagesContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#messagesContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#messagesContainer::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#messagesContainer::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+</style>
+{% endblock %}

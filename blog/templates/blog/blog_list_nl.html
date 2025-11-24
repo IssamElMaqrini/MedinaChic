@@ -1,0 +1,118 @@
+{% extends 'base_nl.html' %}
+{% load static %}
+
+{% block title %}Blog - MedinaChic{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">📝 MedinaChic Blog</h1>
+            <p class="text-muted">Deel uw ervaringen en ontdek artikelen van onze gemeenschap</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated %}
+                <a href="{% url 'blog_create_nl' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Artikel maken
+                </a>
+            {% else %}
+                <a href="{% url 'login-nl' %}" class="btn btn-outline-primary">
+                    Log in om te posten
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <form method="GET" action="{% url 'blog_list_nl' %}">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Zoek een artikel..." value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="bi bi-search"></i> Zoeken
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Blog Posts -->
+    <div class="row">
+        {% if posts %}
+            {% for post in posts %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm hover-shadow">
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title_nl|default:post.title }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center" style="height: 250px; background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);">
+                                <i class="bi bi-file-text text-white" style="font-size: 4rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'blog_detail_nl' post.slug %}" class="text-decoration-none text-dark">
+                                    {{ post.title_nl|default:post.title }}
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted">
+                                {{ post.content_nl|default:post.content|truncatewords:30 }}
+                            </p>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-person"></i> {{ post.author.email }}
+                                    </small>
+                                </div>
+                                <div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar"></i> {{ post.created_at|date:"d/m/Y" }}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-chat-dots"></i> {{ post.comment_count }} reactie{{ post.comment_count|pluralize }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent">
+                            <a href="{% url 'blog_detail_nl' post.slug %}" class="btn btn-sm btn-outline-primary w-100">
+                                Lees artikel <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i>
+                    {% if search_query %}
+                        Geen artikelen gevonden voor "{{ search_query }}".
+                    {% else %}
+                        Nog geen artikelen gepubliceerd. Wees de eerste om uw ervaring te delen!
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.hover-shadow {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+</style>
+{% endblock %}
