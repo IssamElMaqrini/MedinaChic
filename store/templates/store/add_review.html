@@ -116,7 +116,7 @@
         <img src="{{ product.thumbnail_url }}" alt="{{ product.name }}">
         <div>
             <h3>{{ product.name }}</h3>
-            <p class="mb-0" style="color: #C78C3A; font-weight: bold;">{{ product.price }}€</p>
+            <p class="mb-0" style="color: #C78C3A; font-weight: bold;">{{ product.price|floatformat:2 }} €</p>
         </div>
     </div>
     

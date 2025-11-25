@@ -183,7 +183,7 @@
             <div class="stat-label">Totaal Bestellingen</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value">{{ total_revenue|floatformat:2 }}€</div>
+            <div class="stat-value">{{ total_revenue|floatformat:2 }} €</div>
             <div class="stat-label">Omzet</div>
         </div>
         <div class="stat-card">
@@ -230,7 +230,7 @@
                         </td>
                         <td>
                             {% if product.price != 'N/A' %}
-                                {{ product.price }}€
+                                {{ product.price|floatformat:2 }} €
                             {% else %}
                                 <span style="color: #999;">-</span>
                             {% endif %}
@@ -316,7 +316,7 @@
                     <tr>
                         <td><strong>{{ product.name }}</strong></td>
                         <td>{{ product.category }}</td>
-                        <td>{{ product.price }}€</td>
+                        <td>{{ product.price|floatformat:2 }} €</td>
                         <td><span class="badge badge-danger">0</span></td>
                         <td>
                             <form method="POST" style="display: inline;">
@@ -357,7 +357,7 @@
                     <tr>
                         <td><strong>{{ product.name }}</strong></td>
                         <td>{{ product.category }}</td>
-                        <td>{{ product.price }}€</td>
+                        <td>{{ product.price|floatformat:2 }} €</td>
                         <td><span class="badge badge-warning">{{ product.quantity }}</span></td>
                         <td>
                             <form method="POST" style="display: inline;">

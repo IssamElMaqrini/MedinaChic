@@ -19,7 +19,7 @@
         <div class="card mb-3">
             <div class="card-header" style="background-color: #872D37; color: white;">
                 <strong>Commande du {{ order.order_date|date:"d/m/Y à H:i" }}</strong>
-                <span class="float-end">Total: {{ order.total_amount|floatformat:2 }}€</span>
+                <span class="float-end">Total: {{ order.total_amount|floatformat:2 }} €</span>
             </div>
             <div class="card-body">
                 <h5 class="card-title">Articles commandés:</h5>
@@ -45,9 +45,9 @@
                                 {% endif %}
                             </td>
                             <td>{{ item.product_name }}</td>
-                            <td>{{ item.product_price|floatformat:2 }}€</td>
+                            <td>{{ item.product_price|floatformat:2 }} €</td>
                             <td>{{ item.quantity }}</td>
-                            <td>{{ item.subtotal|floatformat:2 }}€</td>
+                            <td>{{ item.subtotal|floatformat:2 }} €</td>
                             <td>
                                 {% if item.product_slug %}
                                     {% if item.has_review %}

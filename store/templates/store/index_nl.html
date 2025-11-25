@@ -251,7 +251,7 @@
                     </div>
                     {% endif %}
                     
-                    <div class="product-price">€{{ product.price }}</div>
+                    <div class="product-price">{{ product.price|floatformat:2 }} €</div>
                     
                     {% if product.quantity > 0 %}
                         <div class="product-stock">✓ Op voorraad ({{ product.quantity }} beschikbaar)</div>
