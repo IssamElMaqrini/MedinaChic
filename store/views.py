@@ -463,6 +463,19 @@ def order_history_nl(request):
     return render(request, 'store/order_history_nl.html', {'orders': orders})
 
 
+@login_required
+def generate_invoice(request, order_id):
+    """Génère une facture PDF pour une commande"""
+    from store.models import OrderHistory
+    from store.invoice import generate_invoice_pdf
+    
+    # Récupérer la commande
+    order = get_object_or_404(OrderHistory, id=order_id, user=request.user)
+    
+    # Générer et retourner le PDF
+    return generate_invoice_pdf(order)
+
+
 def produits_par_categorie(request, category):
     products = Product.objects.filter(category=category)
     return render(request, 'store/index.html', {'products': products, 'selected_category': category})

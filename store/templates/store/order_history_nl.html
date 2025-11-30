@@ -18,8 +18,15 @@
         {% for order in orders %}
         <div class="card mb-3">
             <div class="card-header" style="background-color: #872D37; color: white;">
-                <strong>Bestelling van {{ order.order_date|date:"d/m/Y om H:i" }}</strong>
-                <span class="float-end">Totaal: {{ order.total_amount|floatformat:2 }} €</span>
+                <div class="d-flex justify-content-between align-items-center">
+                    <strong>Bestelling van {{ order.order_date|date:"d/m/Y om H:i" }}</strong>
+                    <div>
+                        <span class="me-3">Totaal: {{ order.total_amount|floatformat:2 }} €</span>
+                        <a href="{% url 'generate-invoice' order.id %}" target="_blank" class="btn btn-sm btn-light">
+                            <i class="bi bi-file-earmark-pdf"></i> Factuur downloaden
+                        </a>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <h5 class="card-title">Bestelde artikelen:</h5>

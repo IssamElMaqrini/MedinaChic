@@ -2,7 +2,7 @@ from django.urls import path
 from store.views import index, product_detail, add_to_cart, cart, delete_cart, create_checkout_session, \
     checkout_success, checkout_cancelled, stripe_webhook, update_quantities, apropos, produits_par_categorie, product_detail_nl, apropos_nl, \
     cart_nl, produits_par_categorie_nl, api_products, order_history, order_history_nl, api_signup, \
-    add_review, add_review_nl, delete_review
+    add_review, add_review_nl, delete_review, generate_invoice
 from store.admin_views import admin_dashboard, admin_dashboard_nl
 
 urlpatterns = [
@@ -12,6 +12,7 @@ urlpatterns = [
     path('nl/cart/', cart_nl, name='cart-nl'),
     path('history/', order_history, name="order-history"),
     path('nl/history/', order_history_nl, name='order-history-nl'),
+    path('invoice/<int:order_id>/', generate_invoice, name="generate-invoice"),
     path('apropos/', apropos, name="apropos"),
     path('nl/overons', apropos_nl, name="apropos-nl"),
     path('cart/update_quantities/', update_quantities, name="update-quantities"),
