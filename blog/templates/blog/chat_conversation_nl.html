@@ -28,10 +28,10 @@
                         {% for message in messages %}
                             <div class="mb-3 {% if message.sender == user %}text-end{% endif %}">
                                 <div class="d-inline-block" style="max-width: 70%;">
-                                    <div class="p-2 rounded {% if message.sender == user %}bg-primary text-white{% else %}bg-white{% endif %}"
-                                         style="box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-                                        <p class="mb-1" style="white-space: pre-wrap;">{{ message.content }}</p>
-                                        <small class="{% if message.sender == user %}text-white-50{% else %}text-muted{% endif %}">
+                                    <div class="p-2 rounded text-white"
+                                         style="{% if message.sender == user %}background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);{% else %}background-color: #f8f9fa; color: #000 !important;{% endif %} box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                        <p class="mb-1" style="white-space: pre-wrap; {% if message.sender != user %}color: #000;{% endif %}">{{ message.content }}</p>
+                                        <small style="{% if message.sender == user %}opacity: 0.8;{% else %}color: #6c757d;{% endif %}">
                                             {{ message.created_at|date:"H:i" }}
                                             {% if message.sender == user %}
                                                 {% if message.is_read %}
@@ -60,8 +60,8 @@
                         {% csrf_token %}
                         <input type="hidden" id="recipientId" value="{{ other_user.id }}">
                         <input type="text" id="messageInput" class="form-control" placeholder="Typ uw bericht..." required>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-send"></i> Versturen
+                        <button type="submit" class="btn" style="background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%); color: white; border: none;">
+                            <i class="bi bi-send"></i> Verzenden
                         </button>
                     </form>
                 </div>
@@ -111,9 +111,9 @@ document.getElementById('messageForm').addEventListener('submit', function(e) {
             messageDiv.className = 'mb-3 text-end';
             messageDiv.innerHTML = `
                 <div class="d-inline-block" style="max-width: 70%;">
-                    <div class="p-2 rounded bg-primary text-white" style="box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                    <div class="p-2 rounded text-white" style="background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%); box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
                         <p class="mb-1" style="white-space: pre-wrap;">${content}</p>
-                        <small class="text-white-50">
+                        <small style="opacity: 0.8;">
                             ${data.created_at}
                             <i class="bi bi-check"></i>
                         </small>
