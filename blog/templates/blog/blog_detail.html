@@ -28,8 +28,15 @@
                             <i class="bi bi-person-circle" style="color: #872D37;"></i>
                             <strong>{{ post.author.email }}</strong>
                         </div>
-                        <div class="text-muted">
-                            <i class="bi bi-calendar"></i> {{ post.created_at|date:"d F Y à H:i" }}
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="text-muted">
+                                <i class="bi bi-calendar"></i> {{ post.created_at|date:"d F Y à H:i" }}
+                            </div>
+                            {% if user.is_authenticated and user == post.author or user.is_staff %}
+                                <a href="{% url 'blog_delete' post.slug %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Supprimer
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                     

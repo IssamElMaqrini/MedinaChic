@@ -131,6 +131,25 @@ def blog_create_nl(request):
 
 
 @login_required
+def blog_delete(request, slug):
+    """Supprimer un article (FR) - Seul l'auteur ou un admin peut supprimer"""
+    post = get_object_or_404(BlogPost, slug=slug)
+    
+    # Vérifier les permissions : auteur ou admin
+    if request.user == post.author or request.user.is_staff:
+        if request.method == 'POST':
+            post.delete()
+            messages.success(request, "L'article a été supprimé avec succès.")
+            return redirect('blog_list')
+    else:
+        messages.error(request, "Vous n'avez pas la permission de supprimer cet article.")
+        return redirect('blog_detail', slug=slug)
+    
+    # Afficher la page de confirmation
+    return render(request, 'blog/blog_confirm_delete.html', {'post': post})
+
+
+@login_required
 def add_comment(request, slug):
     """Ajouter un commentaire à un article (FR)"""
     if request.method == 'POST':
@@ -148,6 +167,25 @@ def add_comment(request, slug):
             messages.error(request, "Le commentaire ne peut pas être vide.")
     
     return redirect('blog_detail', slug=slug)
+
+
+@login_required
+def blog_delete_nl(request, slug):
+    """Supprimer un article (NL) - Seul l'auteur ou un admin peut supprimer"""
+    post = get_object_or_404(BlogPost, slug=slug)
+    
+    # Vérifier les permissions : auteur ou admin
+    if request.user == post.author or request.user.is_staff:
+        if request.method == 'POST':
+            post.delete()
+            messages.success(request, "Het artikel is succesvol verwijderd.")
+            return redirect('blog_list_nl')
+    else:
+        messages.error(request, "U heeft geen toestemming om dit artikel te verwijderen.")
+        return redirect('blog_detail_nl', slug=slug)
+    
+    # Afficher la page de confirmation
+    return render(request, 'blog/blog_confirm_delete_nl.html', {'post': post})
 
 
 @login_required

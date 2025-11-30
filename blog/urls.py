@@ -13,6 +13,7 @@ urlpatterns = [
     path('create/', views.blog_create, name='blog_create'),
     path('article/<slug:slug>/', views.blog_detail, name='blog_detail'),
     path('article/<slug:slug>/comment/', views.add_comment, name='add_comment'),
+    path('article/<slug:slug>/delete/', views.blog_delete, name='blog_delete'),
     
     # Chat routes (NL) - MUST BE BEFORE blog routes to avoid slug conflict
     path('nl/chat/', views.chat_list_nl, name='chat_list_nl'),
@@ -23,4 +24,5 @@ urlpatterns = [
     path('nl/create/', views.blog_create_nl, name='blog_create_nl'),
     path('nl/article/<slug:slug>/', views.blog_detail_nl, name='blog_detail_nl'),
     path('nl/article/<slug:slug>/comment/', views.add_comment_nl, name='add_comment_nl'),
+    path('nl/article/<slug:slug>/delete/', views.blog_delete_nl, name='blog_delete_nl'),
 ]
