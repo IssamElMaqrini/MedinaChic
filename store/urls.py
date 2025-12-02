@@ -2,7 +2,8 @@ from django.urls import path
 from store.views import index, product_detail, add_to_cart, cart, delete_cart, create_checkout_session, \
     checkout_success, checkout_cancelled, stripe_webhook, update_quantities, apropos, produits_par_categorie, product_detail_nl, apropos_nl, \
     cart_nl, produits_par_categorie_nl, api_products, order_history, order_history_nl, api_signup, \
-    add_review, add_review_nl, delete_review, generate_invoice
+    add_review, add_review_nl, delete_review, generate_invoice, subscribe_stock_alert, subscribe_stock_alert_nl, \
+    check_stock_alerts, check_stock_alerts_nl
 from store.admin_views import admin_dashboard, admin_dashboard_nl
 
 urlpatterns = [
@@ -27,6 +28,10 @@ urlpatterns = [
     path('product/<str:slug>/review/', add_review, name="add-review"),
     path('nl/product/<str:slug>/review/', add_review_nl, name="add-review-nl"),
     path('review/<int:review_id>/delete/', delete_review, name="delete-review"),
+    path('product/<str:slug>/stock-alert/', subscribe_stock_alert, name="subscribe-stock-alert"),
+    path('nl/product/<str:slug>/stock-alert/', subscribe_stock_alert_nl, name="subscribe-stock-alert-nl"),
+    path('check-stock-alerts/', check_stock_alerts, name="check-stock-alerts"),
+    path('nl/check-stock-alerts/', check_stock_alerts_nl, name="check-stock-alerts-nl"),
     path('categorie/<str:category>/', produits_par_categorie, name='products-by-category'),
     path('nl/categorie/<str:category>/', produits_par_categorie_nl, name='products-by-category-nl'),
     path('api/products/', api_products, name='api-products'),

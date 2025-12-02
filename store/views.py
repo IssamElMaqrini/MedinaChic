@@ -719,3 +719,113 @@ def delete_review(request, review_id):
     
     messages.success(request, "Votre avis a été supprimé.")
     return redirect('product', slug=product_slug)
+
+
+@login_required
+def subscribe_stock_alert(request, slug):
+    """S'inscrire pour recevoir une alerte de retour en stock"""
+    from django.contrib import messages
+    from store.models import StockAlert
+    
+    product = get_object_or_404(Product, slug=slug)
+    
+    # Vérifier si l'utilisateur a déjà une alerte pour ce produit
+    alert, created = StockAlert.objects.get_or_create(
+        user=request.user,
+        product=product
+    )
+    
+    if created:
+        messages.success(request, f"Vous serez notifié(e) quand '{product.name}' sera de nouveau en stock !")
+    else:
+        if alert.notified:
+            # Réactiver l'alerte si elle a déjà été notifiée
+            alert.notified = False
+            alert.save()
+            messages.success(request, f"Votre alerte pour '{product.name}' a été réactivée !")
+        else:
+            messages.info(request, f"Vous êtes déjà inscrit(e) pour être notifié(e) du retour en stock de '{product.name}'.")
+    
+    return redirect('product', slug=slug)
+
+
+@login_required
+def subscribe_stock_alert_nl(request, slug):
+    """S'inscrire pour recevoir une alerte de retour en stock (version NL)"""
+    from django.contrib import messages
+    from store.models import StockAlert
+    
+    product = get_object_or_404(Product, slug=slug)
+    
+    # Vérifier si l'utilisateur a déjà une alerte pour ce produit
+    alert, created = StockAlert.objects.get_or_create(
+        user=request.user,
+        product=product
+    )
+    
+    if created:
+        messages.success(request, f"U wordt op de hoogte gebracht wanneer '{product.name_nl or product.name}' weer op voorraad is!")
+    else:
+        if alert.notified:
+            # Réactiver l'alerte si elle a déjà été notifiée
+            alert.notified = False
+            alert.save()
+            messages.success(request, f"Uw waarschuwing voor '{product.name_nl or product.name}' is opnieuw geactiveerd!")
+        else:
+            messages.info(request, f"U bent al ingeschreven om op de hoogte te worden gebracht wanneer '{product.name_nl or product.name}' weer op voorraad is.")
+    
+    return redirect('product-nl', slug=slug)
+
+
+@login_required
+def check_stock_alerts(request):
+    """Vérifier s'il y a des alertes de stock notifiées pour l'utilisateur"""
+    from django.http import JsonResponse
+    from store.models import StockAlert
+    
+    alerts = StockAlert.objects.filter(
+        user=request.user,
+        notified=True
+    ).select_related('product')
+    
+    notifications = []
+    for alert in alerts:
+        notifications.append({
+            'id': alert.id,
+            'product_name': alert.product.name,
+            'product_slug': alert.product.slug,
+            'product_thumbnail': alert.product.thumbnail.url if alert.product.thumbnail else None,
+            'notified_at': alert.notified_at.strftime('%Y-%m-%d %H:%M:%S') if alert.notified_at else None
+        })
+        
+        # Supprimer l'alerte après l'avoir récupérée (pour ne pas afficher plusieurs fois)
+        alert.delete()
+    
+    return JsonResponse({'alerts': notifications})
+
+
+@login_required
+def check_stock_alerts_nl(request):
+    """Vérifier s'il y a des alertes de stock notifiées pour l'utilisateur (version NL)"""
+    from django.http import JsonResponse
+    from store.models import StockAlert
+    
+    alerts = StockAlert.objects.filter(
+        user=request.user,
+        notified=True
+    ).select_related('product')
+    
+    notifications = []
+    for alert in alerts:
+        notifications.append({
+            'id': alert.id,
+            'product_name': alert.product.name_nl or alert.product.name,
+            'product_slug': alert.product.slug,
+            'product_thumbnail': alert.product.thumbnail.url if alert.product.thumbnail else None,
+            'notified_at': alert.notified_at.strftime('%Y-%m-%d %H:%M:%S') if alert.notified_at else None
+        })
+        
+        # Supprimer l'alerte après l'avoir récupérée (pour ne pas afficher plusieurs fois)
+        alert.delete()
+    
+    return JsonResponse({'alerts': notifications})

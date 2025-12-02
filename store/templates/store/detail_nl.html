@@ -51,6 +51,29 @@
             display: inline-block;
             max-width: 600px;
         }
+
+        /* Styles personnalisés pour les messages de notification */
+        .alert-success {
+            background: linear-gradient(135deg, rgba(135, 45, 55, 0.15) 0%, rgba(199, 140, 58, 0.15) 100%);
+            border: 2px solid #872D37;
+            color: #872D37;
+            font-weight: 500;
+        }
+
+        .alert-success .btn-close {
+            filter: brightness(0) saturate(100%) invert(16%) sepia(45%) saturate(2098%) hue-rotate(330deg) brightness(91%) contrast(88%);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(199, 140, 58, 0.15) 0%, rgba(135, 45, 55, 0.15) 100%);
+            border: 2px solid #C78C3A;
+            color: #872D37;
+            font-weight: 500;
+        }
+
+        .alert-info .btn-close {
+            filter: brightness(0) saturate(100%) invert(16%) sepia(45%) saturate(2098%) hue-rotate(330deg) brightness(91%) contrast(88%);
+        }
     </style>
 
     <!-- Messages de notification -->
@@ -58,7 +81,7 @@
         <div class="container mb-3">
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
+                    <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
@@ -89,6 +112,11 @@
                     <button class="add-to-cart-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
                         Product niet beschikbaar
                     </button>
+                </p>
+                <p class="mt-2">
+                    <a href="{% url 'subscribe-stock-alert-nl' product.slug %}" class="btn" style="background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                        <i class="bi bi-bell-fill"></i> Breng me op de hoogte bij terugkeer in voorraad
+                    </a>
                 </p>
             {% endif %}
         {% endif %}

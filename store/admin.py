@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from store.models import Product, Order, Cart, OrderHistory, OrderHistoryItem, ProductReview
+from store.models import Product, Order, Cart, OrderHistory, OrderHistoryItem, ProductReview, StockAlert
 
 # Register your models here.
 admin.site.register(Product)
@@ -41,5 +41,23 @@ class ProductReviewAdmin(admin.ModelAdmin):
         ('Dates', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(StockAlert)
+class StockAlertAdmin(admin.ModelAdmin):
+    list_display = ['product', 'user', 'created_at', 'notified', 'notified_at']
+    list_filter = ['notified', 'created_at', 'notified_at']
+    search_fields = ['product__name', 'user__email']
+    readonly_fields = ['created_at', 'notified_at']
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Information', {
+            'fields': ('product', 'user')
+        }),
+        ('État de la notification', {
+            'fields': ('notified', 'created_at', 'notified_at')
         }),
     )

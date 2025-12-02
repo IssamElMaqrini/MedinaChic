@@ -236,5 +236,23 @@ class ProductReview(models.Model):
         return '★' * self.rating + '☆' * (5 - self.rating)
 
 
+class StockAlert(models.Model):
+    """Alerte pour le retour en stock d'un produit"""
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='stock_alerts')
+    created_at = models.DateTimeField(auto_now_add=True)
+    notified = models.BooleanField(default=False)
+    notified_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        verbose_name = "Alerte de stock"
+        verbose_name_plural = "Alertes de stock"
+        ordering = ['-created_at']
+        unique_together = ['product', 'user']
+    
+    def __str__(self):
+        return f"Alerte: {self.user.email} - {self.product.name}"
+
+
 
 
