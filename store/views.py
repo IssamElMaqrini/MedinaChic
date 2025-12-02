@@ -450,16 +450,17 @@ def apropos(request):
 
 
 @login_required
+@login_required
 def order_history(request):
     from store.models import OrderHistory
-    orders = OrderHistory.objects.filter(user=request.user)
+    orders = OrderHistory.objects.filter(user=request.user).prefetch_related('return_requests', 'items')
     return render(request, 'store/order_history.html', {'orders': orders})
 
 
 @login_required
 def order_history_nl(request):
     from store.models import OrderHistory
-    orders = OrderHistory.objects.filter(user=request.user)
+    orders = OrderHistory.objects.filter(user=request.user).prefetch_related('return_requests', 'items')
     return render(request, 'store/order_history_nl.html', {'orders': orders})
 
 
@@ -829,3 +830,181 @@ def check_stock_alerts_nl(request):
         alert.delete()
     
     return JsonResponse({'alerts': notifications})
+
+
+@login_required
+def create_return_request(request, order_id):
+    """Créer une demande de retour pour une commande"""
+    from django.contrib import messages
+    from store.models import OrderHistory, ReturnRequest, ReturnRequestItem
+    from store.forms import ReturnRequestForm
+    
+    order = get_object_or_404(OrderHistory, id=order_id, user=request.user)
+    
+    # Vérifier s'il n'y a pas déjà une demande en attente
+    if order.return_requests.filter(status='pending').exists():
+        messages.warning(request, "Vous avez déjà une demande de retour en attente pour cette commande.")
+        return redirect('order-history')
+    
+    if request.method == 'POST':
+        form = ReturnRequestForm(order=order, data=request.POST, files=request.FILES)
+        if form.is_valid():
+            return_request = form.save(commit=False)
+            return_request.user = request.user
+            return_request.order = order
+            return_request.save()
+            
+            # Créer les ReturnRequestItem pour chaque article sélectionné
+            for item in order.items.all():
+                field_name = f'item_{item.id}'
+                quantity_field_name = f'quantity_{item.id}'
+                
+                if form.cleaned_data.get(field_name):
+                    quantity = form.cleaned_data.get(quantity_field_name, item.quantity)
+                    ReturnRequestItem.objects.create(
+                        return_request=return_request,
+                        order_item=item,
+                        quantity=quantity
+                    )
+            
+            messages.success(request, "Votre demande de retour a été envoyée. L'administrateur vous répondra bientôt.")
+            return redirect('order-history')
+    else:
+        form = ReturnRequestForm(order=order)
+    
+    return render(request, 'store/return_request_form.html', {
+        'form': form,
+        'order': order
+    })
+
+
+@login_required
+def create_return_request_nl(request, order_id):
+    """Créer une demande de retour pour une commande (version NL)"""
+    from django.contrib import messages
+    from store.models import OrderHistory, ReturnRequest, ReturnRequestItem
+    from store.forms import ReturnRequestForm
+    
+    order = get_object_or_404(OrderHistory, id=order_id, user=request.user)
+    
+    # Vérifier s'il n'y a pas déjà une demande en attente
+    if order.return_requests.filter(status='pending').exists():
+        messages.warning(request, "U heeft al een retourverzoek in behandeling voor deze bestelling.")
+        return redirect('order-history-nl')
+    
+    if request.method == 'POST':
+        form = ReturnRequestForm(order=order, data=request.POST, files=request.FILES)
+        if form.is_valid():
+            return_request = form.save(commit=False)
+            return_request.user = request.user
+            return_request.order = order
+            return_request.save()
+            
+            # Créer les ReturnRequestItem pour chaque article sélectionné
+            for item in order.items.all():
+                field_name = f'item_{item.id}'
+                quantity_field_name = f'quantity_{item.id}'
+                
+                if form.cleaned_data.get(field_name):
+                    quantity = form.cleaned_data.get(quantity_field_name, item.quantity)
+                    ReturnRequestItem.objects.create(
+                        return_request=return_request,
+                        order_item=item,
+                        quantity=quantity
+                    )
+            
+            messages.success(request, "Uw retourverzoek is verzonden. De beheerder zal binnenkort antwoorden.")
+            return redirect('order-history-nl')
+    else:
+        form = ReturnRequestForm(order=order)
+    
+    return render(request, 'store/return_request_form_nl.html', {
+        'form': form,
+        'order': order
+    })
+
+
+@login_required
+def view_return_request(request, request_id):
+    """Voir les détails d'une demande de retour"""
+    from store.models import ReturnRequest
+    
+    return_request = get_object_or_404(ReturnRequest, id=request_id, user=request.user)
+    
+    return render(request, 'store/return_request_detail.html', {
+        'return_request': return_request
+    })
+
+
+@login_required
+def view_return_request_nl(request, request_id):
+    """Voir les détails d'une demande de retour (version NL)"""
+    from store.models import ReturnRequest
+    
+    return_request = get_object_or_404(ReturnRequest, id=request_id, user=request.user)
+    
+    return render(request, 'store/return_request_detail_nl.html', {
+        'return_request': return_request
+    })
+
+
+@login_required
+def notifications(request):
+    """Afficher les notifications de l'utilisateur"""
+    from store.models import Notification
+    
+    # Récupérer toutes les notifications de l'utilisateur
+    user_notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Marquer comme lues si demandé
+    if request.method == 'POST' and 'mark_read' in request.POST:
+        notification_id = request.POST.get('notification_id')
+        if notification_id:
+            notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+            notification.is_read = True
+            notification.save()
+            return redirect('notifications')
+    
+    # Marquer toutes comme lues
+    if request.method == 'POST' and 'mark_all_read' in request.POST:
+        user_notifications.update(is_read=True)
+        return redirect('notifications')
+    
+    # Compter les non lues
+    unread_count = user_notifications.filter(is_read=False).count()
+    
+    return render(request, 'store/notifications.html', {
+        'notifications': user_notifications,
+        'unread_count': unread_count
+    })
+
+
+@login_required
+def notifications_nl(request):
+    """Afficher les notifications de l'utilisateur (version NL)"""
+    from store.models import Notification
+    
+    # Récupérer toutes les notifications de l'utilisateur
+    user_notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Marquer comme lues si demandé
+    if request.method == 'POST' and 'mark_read' in request.POST:
+        notification_id = request.POST.get('notification_id')
+        if notification_id:
+            notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+            notification.is_read = True
+            notification.save()
+            return redirect('notifications-nl')
+    
+    # Marquer toutes comme lues
+    if request.method == 'POST' and 'mark_all_read' in request.POST:
+        user_notifications.update(is_read=True)
+        return redirect('notifications-nl')
+    
+    # Compter les non lues
+    unread_count = user_notifications.filter(is_read=False).count()
+    
+    return render(request, 'store/notifications_nl.html', {
+        'notifications': user_notifications,
+        'unread_count': unread_count
+    })

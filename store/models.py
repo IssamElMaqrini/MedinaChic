@@ -162,6 +162,14 @@ class OrderHistory(models.Model):
     def __str__(self):
         return f"Order by {self.user.email} on {self.order_date.strftime('%Y-%m-%d %H:%M')}"
     
+    def has_pending_return_request(self):
+        """Vérifie si cette commande a une demande de retour en attente"""
+        return self.return_requests.filter(status='pending').exists()
+    
+    def has_any_return_request(self):
+        """Vérifie si cette commande a déjà une demande de retour (peu importe le statut)"""
+        return self.return_requests.exists()
+    
     class Meta:
         verbose_name_plural = "Order Histories"
         ordering = ['-order_date']
@@ -252,6 +260,85 @@ class StockAlert(models.Model):
     
     def __str__(self):
         return f"Alerte: {self.user.email} - {self.product.name}"
+
+
+class ReturnRequest(models.Model):
+    """Demande de retour de commande"""
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('approved', 'Approuvée'),
+        ('rejected', 'Refusée'),
+    ]
+    
+    order = models.ForeignKey(OrderHistory, on_delete=models.CASCADE, related_name='return_requests')
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    reason = models.TextField(verbose_name="Raison du retour")
+    photo = models.ImageField(upload_to="returns/", verbose_name="Photo du produit", blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Statut")
+    admin_response = models.TextField(blank=True, null=True, verbose_name="Réponse de l'administrateur")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Demande de retour"
+        verbose_name_plural = "Demandes de retour"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Retour #{self.id} - Commande #{self.order.id} - {self.get_status_display()}"
+    
+    def can_request_return(self):
+        """Vérifie si une demande de retour peut être faite (pas de retour déjà en cours)"""
+        return not self.order.return_requests.filter(status='pending').exists()
+    
+    def get_total_return_amount(self):
+        """Calcule le montant total des articles à retourner"""
+        total = sum(item.get_subtotal() for item in self.items.all())
+        return total
+
+
+class ReturnRequestItem(models.Model):
+    """Articles spécifiques d'une demande de retour"""
+    return_request = models.ForeignKey(ReturnRequest, on_delete=models.CASCADE, related_name='items')
+    order_item = models.ForeignKey(OrderHistoryItem, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1, verbose_name="Quantité à retourner")
+    
+    class Meta:
+        verbose_name = "Article de retour"
+        verbose_name_plural = "Articles de retour"
+    
+    def __str__(self):
+        return f"{self.order_item.product_name} x{self.quantity}"
+    
+    def get_subtotal(self):
+        """Calcule le sous-total pour cet article"""
+        return self.order_item.product_price * self.quantity
+
+
+class Notification(models.Model):
+    """Notifications pour les utilisateurs"""
+    NOTIFICATION_TYPES = [
+        ('return_approved', 'Retour approuvé'),
+        ('return_rejected', 'Retour refusé'),
+        ('stock_alert', 'Alerte de stock'),
+        ('order_status', 'Statut de commande'),
+    ]
+    
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    related_return_request = models.ForeignKey(ReturnRequest, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    
+    class Meta:
+        verbose_name = "Notification"
+        verbose_name_plural = "Notifications"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.title}"
 
 
 

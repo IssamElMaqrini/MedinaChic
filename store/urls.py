@@ -3,17 +3,29 @@ from store.views import index, product_detail, add_to_cart, cart, delete_cart, c
     checkout_success, checkout_cancelled, stripe_webhook, update_quantities, apropos, produits_par_categorie, product_detail_nl, apropos_nl, \
     cart_nl, produits_par_categorie_nl, api_products, order_history, order_history_nl, api_signup, \
     add_review, add_review_nl, delete_review, generate_invoice, subscribe_stock_alert, subscribe_stock_alert_nl, \
-    check_stock_alerts, check_stock_alerts_nl
-from store.admin_views import admin_dashboard, admin_dashboard_nl
+    check_stock_alerts, check_stock_alerts_nl, create_return_request, create_return_request_nl, \
+    view_return_request, view_return_request_nl, notifications, notifications_nl
+from store.admin_views import admin_dashboard, admin_dashboard_nl, admin_return_requests, admin_return_requests_nl, \
+    admin_process_return, admin_process_return_nl
 
 urlpatterns = [
     path('admin-dashboard/', admin_dashboard, name="admin-dashboard"),
     path('nl/admin-dashboard/', admin_dashboard_nl, name='admin-dashboard-nl'),
+    path('admin-return-requests/', admin_return_requests, name="admin-return-requests"),
+    path('nl/admin-return-requests/', admin_return_requests_nl, name='admin-return-requests-nl'),
+    path('admin-process-return/<int:request_id>/', admin_process_return, name="admin-process-return"),
+    path('nl/admin-process-return/<int:request_id>/', admin_process_return_nl, name='admin-process-return-nl'),
     path('cart/', cart, name="cart"),
     path('nl/cart/', cart_nl, name='cart-nl'),
     path('history/', order_history, name="order-history"),
     path('nl/history/', order_history_nl, name='order-history-nl'),
     path('invoice/<int:order_id>/', generate_invoice, name="generate-invoice"),
+    path('return-request/<int:order_id>/', create_return_request, name="create-return-request"),
+    path('nl/return-request/<int:order_id>/', create_return_request_nl, name='create-return-request-nl'),
+    path('view-return-request/<int:request_id>/', view_return_request, name="view-return-request"),
+    path('nl/view-return-request/<int:request_id>/', view_return_request_nl, name='view-return-request-nl'),
+    path('notifications/', notifications, name="notifications"),
+    path('nl/notifications/', notifications_nl, name='notifications-nl'),
     path('apropos/', apropos, name="apropos"),
     path('nl/overons', apropos_nl, name="apropos-nl"),
     path('cart/update_quantities/', update_quantities, name="update-quantities"),

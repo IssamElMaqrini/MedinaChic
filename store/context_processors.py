@@ -1,4 +1,4 @@
-from store.models import Cart
+from store.models import Cart, Notification
 
 def cart_processor(request):
     """Add cart info to all templates"""
@@ -17,3 +17,21 @@ def cart_processor(request):
             pass
     
     return cart_data
+
+
+def notifications_processor(request):
+    """Add unread notifications count to all templates"""
+    notifications_data = {
+        'unread_notifications_count': 0
+    }
+    
+    if request.user.is_authenticated:
+        try:
+            notifications_data['unread_notifications_count'] = Notification.objects.filter(
+                user=request.user,
+                is_read=False
+            ).count()
+        except:
+            pass
+    
+    return notifications_data

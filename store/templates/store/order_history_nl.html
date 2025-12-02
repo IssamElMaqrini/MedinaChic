@@ -18,13 +18,34 @@
         {% for order in orders %}
         <div class="card mb-3">
             <div class="card-header" style="background-color: #872D37; color: white;">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
                     <strong>Bestelling van {{ order.order_date|date:"d/m/Y om H:i" }}</strong>
-                    <div>
-                        <span class="me-3">Totaal: {{ order.total_amount|floatformat:2 }} €</span>
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <span class="me-2">Totaal: {{ order.total_amount|floatformat:2 }} €</span>
                         <a href="{% url 'generate-invoice' order.id %}" target="_blank" class="btn btn-sm btn-light">
                             <i class="bi bi-file-earmark-pdf"></i> Factuur downloaden
                         </a>
+                        {% if not order.has_any_return_request %}
+                            <a href="{% url 'create-return-request-nl' order.id %}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-arrow-return-left"></i> Retour aanvragen
+                            </a>
+                        {% else %}
+                            {% with return_req=order.return_requests.first %}
+                                {% if return_req.status == 'pending' %}
+                                    <a href="{% url 'view-return-request-nl' return_req.id %}" class="badge bg-info text-decoration-none" style="font-size: 0.9em;">
+                                        <i class="bi bi-hourglass-split"></i> Retour in afwachting
+                                    </a>
+                                {% elif return_req.status == 'approved' %}
+                                    <a href="{% url 'view-return-request-nl' return_req.id %}" class="badge bg-success text-decoration-none" style="font-size: 0.9em;">
+                                        <i class="bi bi-check-circle"></i> Retour goedgekeurd
+                                    </a>
+                                {% elif return_req.status == 'rejected' %}
+                                    <a href="{% url 'view-return-request-nl' return_req.id %}" class="badge bg-danger text-decoration-none" style="font-size: 0.9em;">
+                                        <i class="bi bi-x-circle"></i> Retour geweigerd
+                                    </a>
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
                     </div>
                 </div>
             </div>

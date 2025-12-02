@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .process-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .page-title {
+        color: #872D37;
+        border-bottom: 3px solid #C78C3A;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .request-details {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        border: 2px solid #872D37;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .request-details h4 {
+        background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);
+        color: white !important;
+        padding: 1rem 1.5rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .request-details p {
+        background: #f8f9fa;
+        padding: 0.75rem 1rem;
+        border-radius: 5px;
+        margin-bottom: 0.75rem;
+        border-left: 3px solid #C78C3A;
+        color: #212529;
+    }
+
+    .request-details p strong {
+        color: #6c757d;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        min-width: 180px;
+        margin-right: 0.5rem;
+    }
+
+    .order-items-table {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .order-items-table th {
+        background-color: #872D37;
+        color: white;
+        padding: 1rem;
+    }
+
+    .order-items-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .reason-box {
+        background: white;
+        border: 2px solid #C78C3A;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+
+    .reason-header {
+        background: linear-gradient(135deg, #C78C3A 0%, #E5A64A 100%);
+        color: white;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .reason-content {
+        padding: 1.25rem;
+        background: #f8f9fa;
+        color: #212529;
+        font-size: 1rem;
+        line-height: 1.6;
+        min-height: 60px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .return-photo-large {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        border: 3px solid #872D37;
+    }
+
+    .form-check-input:checked {
+        background-color: #872D37;
+        border-color: #872D37;
+    }
+
+    .form-label {
+        color: #872D37;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        padding: 0.75rem;
+    }
+
+    .form-control:focus {
+        border-color: #872D37;
+        box-shadow: 0 0 0 0.2rem rgba(135, 45, 55, 0.25);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(135, 45, 55, 0.3);
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 5px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-cancel:hover {
+        background: #5a6268;
+        color: white;
+    }
+
+    .decision-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+        margin-bottom: 2rem;
+    }
+
+    .form-check {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 2px solid #ddd;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .form-check:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+    }
+
+    .form-check:has(input:checked) {
+        background-color: rgba(135, 45, 55, 0.15);
+        border-color: #872D37;
+        box-shadow: 0 2px 8px rgba(135, 45, 55, 0.2);
+    }
+
+    .form-check-input {
+        width: 1.5em;
+        height: 1.5em;
+        margin-top: 0.15em;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        color: #212529;
+        font-size: 1rem;
+    }
+</style>
+
+<div class="process-container">
+    <h2 class="page-title">
+        <i class="bi bi-gear"></i> Traiter la Demande de Retour #{{ return_request.id }}
+    </h2>
+
+    <div class="request-details">
+        <h4 style="color: #872D37; margin-bottom: 1rem;">
+            <i class="bi bi-info-circle"></i> Informations de la Demande
+        </h4>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Client:</strong> {{ return_request.user.email }}</p>
+                <p><strong>Date de la demande:</strong> {{ return_request.created_at|date:"d/m/Y à H:i" }}</p>
+                <p><strong>Commande:</strong> #{{ return_request.order.id }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Date de commande:</strong> {{ return_request.order.order_date|date:"d/m/Y à H:i" }}</p>
+                <p><strong>Montant total:</strong> {{ return_request.order.total_amount|floatformat:2 }} €</p>
+                <p><strong>Nombre d'articles:</strong> {{ return_request.order.items.count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Articles à retourner -->
+    <h5 style="color: #872D37; margin-bottom: 1rem;">
+        <i class="bi bi-box-seam"></i> Articles à Retourner
+    </h5>
+    <table class="table order-items-table">
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Prix unitaire</th>
+                <th>Quantité à retourner</th>
+                <th>Sous-total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for return_item in return_request.items.all %}
+            <tr>
+                <td>{{ return_item.order_item.product_name }}</td>
+                <td>{{ return_item.order_item.product_price|floatformat:2 }} €</td>
+                <td>
+                    <span class="badge bg-primary">{{ return_item.quantity }}</span>
+                    <small class="text-muted">/ {{ return_item.order_item.quantity }} commandé(s)</small>
+                </td>
+                <td><strong>{{ return_item.get_subtotal|floatformat:2 }} €</strong></td>
+            </tr>
+            {% endfor %}
+            <tr class="table-active">
+                <td colspan="3" class="text-end"><strong>Montant total du retour:</strong></td>
+                <td><strong style="color: #872D37;">{{ return_request.get_total_return_amount|floatformat:2 }} €</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Raison du retour -->
+    <div class="reason-box">
+        <div class="reason-header">
+            <i class="bi bi-chat-left-text"></i>
+            <strong>Raison du Retour</strong>
+        </div>
+        <div class="reason-content">
+            {{ return_request.reason }}
+        </div>
+    </div>
+
+    <!-- Photo si disponible -->
+    {% if return_request.photo %}
+    <h5 style="color: #872D37; margin-bottom: 1rem;">
+        <i class="bi bi-camera"></i> Photo Fournie par le Client
+    </h5>
+    <div class="text-center mb-4">
+        <a href="{{ return_request.photo.url }}" target="_blank">
+            <img src="{{ return_request.photo.url }}" alt="Photo du produit" class="return-photo-large">
+        </a>
+        <p class="text-muted mt-2">Cliquez sur l'image pour l'ouvrir en plein écran</p>
+    </div>
+    {% endif %}
+
+    <!-- Formulaire de décision -->
+    <div class="decision-section">
+        <h5 style="color: #872D37; margin-bottom: 1.5rem;">
+            <i class="bi bi-clipboard-check"></i> Votre Décision
+        </h5>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="form-label">
+                    <i class="bi bi-check-square"></i> Décision *
+                </label>
+                {% for choice in form.status %}
+                <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                        {% if choice.data.value == 'approved' %}
+                            <i class="bi bi-check-circle text-success"></i> <strong>Approuver</strong> - Accepter la demande de retour
+                        {% else %}
+                            <i class="bi bi-x-circle text-danger"></i> <strong>Refuser</strong> - Rejeter la demande de retour
+                        {% endif %}
+                    </label>
+                </div>
+                {% endfor %}
+                {% if form.status.errors %}
+                    <div class="text-danger mt-1">{{ form.status.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label for="{{ form.admin_response.id_for_label }}" class="form-label">
+                    <i class="bi bi-pencil-square"></i> {{ form.admin_response.label }}
+                </label>
+                {{ form.admin_response }}
+                {% if form.admin_response.errors %}
+                    <div class="text-danger mt-1">{{ form.admin_response.errors }}</div>
+                {% endif %}
+                <small class="text-muted d-block mt-1">
+                    <i class="bi bi-info-circle"></i> Obligatoire en cas de refus pour expliquer votre décision au client.
+                </small>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn-submit">
+                    <i class="bi bi-check-lg"></i> Valider la Décision
+                </button>
+                <a href="{% url 'admin-return-requests' %}" class="btn-cancel">
+                    <i class="bi bi-x-circle"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

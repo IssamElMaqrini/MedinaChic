@@ -172,8 +172,17 @@
 
 <div class="dashboard-container">
     <div class="dashboard-header">
-        <h1>🎯 Tableau de Bord Administrateur</h1>
-        <p class="mb-0">Gestion des stocks, commandes et comptes</p>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>🎯 Tableau de Bord Administrateur</h1>
+                <p class="mb-0">Gestion des stocks, commandes et comptes</p>
+            </div>
+            <div>
+                <a href="{% url 'admin-return-requests' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-arrow-return-left"></i> Demandes de Retour
+                </a>
+            </div>
+        </div>
     </div>
     
     <!-- Statistiques -->

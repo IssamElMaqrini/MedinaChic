@@ -331,3 +331,153 @@ def admin_dashboard_nl(request):
     }
     
     return render(request, 'store/admin_dashboard_nl.html', context)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_return_requests(request):
+    """Gérer les demandes de retour (version française)"""
+    from store.models import ReturnRequest
+    
+    # Filtres
+    status_filter = request.GET.get('status', 'all')
+    
+    return_requests = ReturnRequest.objects.all().select_related('order', 'user').order_by('-created_at')
+    
+    if status_filter != 'all':
+        return_requests = return_requests.filter(status=status_filter)
+    
+    # Compter les demandes par statut
+    pending_count = ReturnRequest.objects.filter(status='pending').count()
+    approved_count = ReturnRequest.objects.filter(status='approved').count()
+    rejected_count = ReturnRequest.objects.filter(status='rejected').count()
+    
+    context = {
+        'return_requests': return_requests,
+        'status_filter': status_filter,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+    }
+    
+    return render(request, 'store/admin_return_requests.html', context)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_return_requests_nl(request):
+    """Gérer les demandes de retour (version néerlandaise)"""
+    from store.models import ReturnRequest
+    
+    # Filtres
+    status_filter = request.GET.get('status', 'all')
+    
+    return_requests = ReturnRequest.objects.all().select_related('order', 'user').order_by('-created_at')
+    
+    if status_filter != 'all':
+        return_requests = return_requests.filter(status=status_filter)
+    
+    # Compter les demandes par statut
+    pending_count = ReturnRequest.objects.filter(status='pending').count()
+    approved_count = ReturnRequest.objects.filter(status='approved').count()
+    rejected_count = ReturnRequest.objects.filter(status='rejected').count()
+    
+    context = {
+        'return_requests': return_requests,
+        'status_filter': status_filter,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+        'lang': 'nl'
+    }
+    
+    return render(request, 'store/admin_return_requests_nl.html', context)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_process_return(request, request_id):
+    """Traiter une demande de retour (approuver ou refuser)"""
+    from store.models import ReturnRequest, Notification
+    from store.forms import ReturnRequestResponseForm
+    
+    return_request = get_object_or_404(ReturnRequest, id=request_id)
+    
+    if request.method == 'POST':
+        form = ReturnRequestResponseForm(request.POST, instance=return_request)
+        if form.is_valid():
+            form.save()
+            
+            # Créer une notification pour l'utilisateur
+            if return_request.status == 'approved':
+                Notification.objects.create(
+                    user=return_request.user,
+                    notification_type='return_approved',
+                    title='Demande de retour approuvée',
+                    message=f'Votre demande de retour pour la commande #{return_request.order.id} a été approuvée. {return_request.admin_response or ""}',
+                    related_return_request=return_request
+                )
+                messages.success(request, f"La demande de retour #{return_request.id} a été approuvée.")
+            else:
+                Notification.objects.create(
+                    user=return_request.user,
+                    notification_type='return_rejected',
+                    title='Demande de retour refusée',
+                    message=f'Votre demande de retour pour la commande #{return_request.order.id} a été refusée. Raison: {return_request.admin_response or "Non spécifiée"}',
+                    related_return_request=return_request
+                )
+                messages.success(request, f"La demande de retour #{return_request.id} a été refusée.")
+            
+            return redirect('admin-return-requests')
+    else:
+        form = ReturnRequestResponseForm(instance=return_request)
+    
+    context = {
+        'form': form,
+        'return_request': return_request,
+    }
+    
+    return render(request, 'store/admin_process_return.html', context)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_process_return_nl(request, request_id):
+    """Traiter une demande de retour (approuver ou refuser) - version NL"""
+    from store.models import ReturnRequest, Notification
+    from store.forms import ReturnRequestResponseForm
+    
+    return_request = get_object_or_404(ReturnRequest, id=request_id)
+    
+    if request.method == 'POST':
+        form = ReturnRequestResponseForm(request.POST, instance=return_request)
+        if form.is_valid():
+            form.save()
+            
+            # Créer une notification pour l'utilisateur
+            if return_request.status == 'approved':
+                Notification.objects.create(
+                    user=return_request.user,
+                    notification_type='return_approved',
+                    title='Retourverzoek goedgekeurd',
+                    message=f'Uw retourverzoek voor bestelling #{return_request.order.id} is goedgekeurd. {return_request.admin_response or ""}',
+                    related_return_request=return_request
+                )
+                messages.success(request, f"Het retourverzoek #{return_request.id} is goedgekeurd.")
+            else:
+                Notification.objects.create(
+                    user=return_request.user,
+                    notification_type='return_rejected',
+                    title='Retourverzoek geweigerd',
+                    message=f'Uw retourverzoek voor bestelling #{return_request.order.id} is geweigerd. Reden: {return_request.admin_response or "Niet gespecificeerd"}',
+                    related_return_request=return_request
+                )
+                messages.success(request, f"Het retourverzoek #{return_request.id} is geweigerd.")
+            
+            return redirect('admin-return-requests-nl')
+    else:
+        form = ReturnRequestResponseForm(instance=return_request)
+    
+    context = {
+        'form': form,
+        'return_request': return_request,
+        'lang': 'nl'
+    }
+    
+    return render(request, 'store/admin_process_return_nl.html', context)

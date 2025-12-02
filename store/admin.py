@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from store.models import Product, Order, Cart, OrderHistory, OrderHistoryItem, ProductReview, StockAlert
+from store.models import Product, Order, Cart, OrderHistory, OrderHistoryItem, ProductReview, StockAlert, ReturnRequest, ReturnRequestItem, Notification
 
 # Register your models here.
 admin.site.register(Product)
@@ -59,5 +59,67 @@ class StockAlertAdmin(admin.ModelAdmin):
         }),
         ('État de la notification', {
             'fields': ('notified', 'created_at', 'notified_at')
+        }),
+    )
+
+
+class ReturnRequestItemInline(admin.TabularInline):
+    model = ReturnRequestItem
+    extra = 0
+    readonly_fields = ['order_item', 'quantity']
+    can_delete = False
+
+
+@admin.register(ReturnRequest)
+class ReturnRequestAdmin(admin.ModelAdmin):
+    list_display = ['id', 'order', 'user', 'status', 'get_items_count', 'created_at', 'updated_at']
+    list_filter = ['status', 'created_at', 'updated_at']
+    search_fields = ['order__id', 'user__email', 'reason']
+    readonly_fields = ['created_at', 'updated_at', 'get_total_return_amount']
+    date_hierarchy = 'created_at'
+    inlines = [ReturnRequestItemInline]
+    
+    def get_items_count(self, obj):
+        return obj.items.count()
+    get_items_count.short_description = 'Nombre d\'articles'
+    
+    fieldsets = (
+        ('Information de la commande', {
+            'fields': ('order', 'user')
+        }),
+        ('Détails du retour', {
+            'fields': ('reason', 'photo', 'status', 'get_total_return_amount')
+        }),
+        ('Réponse administrateur', {
+            'fields': ('admin_response',)
+        }),
+        ('Dates', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ['user', 'notification_type', 'title', 'is_read', 'created_at']
+    list_filter = ['notification_type', 'is_read', 'created_at']
+    search_fields = ['user__email', 'title', 'message']
+    readonly_fields = ['created_at']
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Information de notification', {
+            'fields': ('user', 'notification_type', 'title', 'message')
+        }),
+        ('État', {
+            'fields': ('is_read',)
+        }),
+        ('Relation', {
+            'fields': ('related_return_request',)
+        }),
+        ('Date', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
         }),
     )

@@ -1,0 +1,80 @@
+{% extends 'base_nl.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4" style="color: #872D37;">
+        <i class="bi bi-bell"></i> Mijn Notificaties
+        {% if unread_count > 0 %}
+        <span class="badge bg-danger">{{ unread_count }}</span>
+        {% endif %}
+    </h2>
+
+    {% if notifications %}
+        <div class="mb-3">
+            <form method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" name="mark_all_read" class="btn btn-sm" style="background-color: #872D37; color: white;">
+                    <i class="bi bi-check-all"></i> Alle markeren als gelezen
+                </button>
+            </form>
+        </div>
+
+        <div class="list-group">
+            {% for notification in notifications %}
+            <div class="list-group-item {% if not notification.is_read %}list-group-item-warning{% endif %} mb-2 border rounded">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">
+                            {% if notification.notification_type == 'return_approved' %}
+                                <i class="bi bi-check-circle text-success"></i>
+                            {% elif notification.notification_type == 'return_rejected' %}
+                                <i class="bi bi-x-circle text-danger"></i>
+                            {% elif notification.notification_type == 'stock_alert' %}
+                                <i class="bi bi-box-seam text-info"></i>
+                            {% endif %}
+                            {{ notification.title }}
+                        </h5>
+                        <p class="mb-1">{{ notification.message }}</p>
+                        <small class="text-muted">
+                            <i class="bi bi-clock"></i> {{ notification.created_at|date:"d/m/Y \o\m H:i" }}
+                        </small>
+                        
+                        {% if notification.related_return_request %}
+                        <div class="mt-2">
+                            <a href="{% url 'view-return-request-nl' notification.related_return_request.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Retourverzoek bekijken
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="ms-3">
+                        {% if not notification.is_read %}
+                        <form method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                            <button type="submit" name="mark_read" class="btn btn-sm btn-outline-success" title="Markeren als gelezen">
+                                <i class="bi bi-check"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="badge bg-success">Gelezen</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> U hebt momenteel geen notificaties.
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'order-history-nl' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Terug naar mijn bestellingen
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #872D37;
+        margin-bottom: 1rem;
+    }
+
+    .filter-tabs {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .filter-tabs .nav-link {
+        color: #872D37;
+        border: 2px solid transparent;
+        border-radius: 5px;
+        padding: 0.5rem 1.5rem;
+        margin: 0 0.25rem;
+        transition: all 0.3s ease;
+    }
+
+    .filter-tabs .nav-link:hover {
+        background-color: rgba(135, 45, 55, 0.1);
+    }
+
+    .filter-tabs .nav-link.active {
+        background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);
+        color: white;
+        border-color: #872D37;
+    }
+
+    .return-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #C78C3A;
+    }
+
+    .return-card.pending {
+        border-left-color: #ffc107;
+    }
+
+    .return-card.approved {
+        border-left-color: #28a745;
+    }
+
+    .return-card.rejected {
+        border-left-color: #dc3545;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-badge.pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-badge.approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .btn-process {
+        background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-process:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(135, 45, 55, 0.3);
+        color: white;
+    }
+
+    .return-photo {
+        max-width: 200px;
+        height: auto;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+    }
+
+    .reason-card {
+        background: white;
+        border: 2px solid #C78C3A;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .reason-header {
+        background: linear-gradient(135deg, #C78C3A 0%, #E5A64A 100%);
+        color: white;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .reason-content {
+        padding: 1.25rem;
+        background: #f8f9fa;
+        color: #212529;
+        font-size: 1rem;
+        line-height: 1.6;
+        min-height: 60px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .response-card {
+        background: white;
+        border: 2px solid #872D37;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .response-header {
+        background: linear-gradient(135deg, #872D37 0%, #A53B47 100%);
+        color: white;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .response-content {
+        padding: 1.25rem;
+        background: #f8f9fa;
+        color: #212529;
+        font-size: 1rem;
+        line-height: 1.6;
+        min-height: 60px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+</style>
+
+<div class="admin-header">
+    <h2 class="mb-0">
+        <i class="bi bi-arrow-return-left"></i> Gestion des Demandes de Retour
+    </h2>
+    <p class="mb-0 mt-2">Gérez les demandes de retour de vos clients</p>
+</div>
+
+<!-- Statistiques -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stats-card">
+            <h5 style="color: #ffc107;">
+                <i class="bi bi-hourglass-split"></i> En attente
+            </h5>
+            <h2 style="color: #872D37;">{{ pending_count }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stats-card" style="border-left-color: #28a745;">
+            <h5 style="color: #28a745;">
+                <i class="bi bi-check-circle"></i> Approuvées
+            </h5>
+            <h2 style="color: #872D37;">{{ approved_count }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stats-card" style="border-left-color: #dc3545;">
+            <h5 style="color: #dc3545;">
+                <i class="bi bi-x-circle"></i> Refusées
+            </h5>
+            <h2 style="color: #872D37;">{{ rejected_count }}</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="filter-tabs">
+    <ul class="nav nav-pills justify-content-center">
+        <li class="nav-item">
+            <a class="nav-link {% if status_filter == 'all' %}active{% endif %}" 
+               href="?status=all">
+                <i class="bi bi-list"></i> Toutes ({{ pending_count|add:approved_count|add:rejected_count }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if status_filter == 'pending' %}active{% endif %}" 
+               href="?status=pending">
+                <i class="bi bi-hourglass-split"></i> En attente ({{ pending_count }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if status_filter == 'approved' %}active{% endif %}" 
+               href="?status=approved">
+                <i class="bi bi-check-circle"></i> Approuvées ({{ approved_count }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if status_filter == 'rejected' %}active{% endif %}" 
+               href="?status=rejected">
+                <i class="bi bi-x-circle"></i> Refusées ({{ rejected_count }})
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Liste des demandes -->
+{% if return_requests %}
+    {% for request in return_requests %}
+    <div class="return-card {{ request.status }}">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 style="color: #872D37;">
+                            <i class="bi bi-box-seam"></i> Demande #{{ request.id }}
+                        </h5>
+                        <p class="text-muted mb-1">
+                            <strong>Client:</strong> {{ request.user.email }}
+                        </p>
+                        <p class="text-muted mb-1">
+                            <strong>Commande:</strong> #{{ request.order.id }} 
+                            ({{ request.order.order_date|date:"d/m/Y à H:i" }})
+                        </p>
+                        <p class="text-muted mb-1">
+                            <strong>Montant de la commande:</strong> {{ request.order.total_amount|floatformat:2 }} €
+                        </p>
+                        <p class="text-muted mb-1">
+                            <strong>Date de la demande:</strong> {{ request.created_at|date:"d/m/Y à H:i" }}
+                        </p>
+                    </div>
+                    <span class="status-badge {{ request.status }}">
+                        {% if request.status == 'pending' %}
+                            <i class="bi bi-hourglass-split"></i> En attente
+                        {% elif request.status == 'approved' %}
+                            <i class="bi bi-check-circle"></i> Approuvée
+                        {% else %}
+                            <i class="bi bi-x-circle"></i> Refusée
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="reason-card">
+                        <div class="reason-header">
+                            <i class="bi bi-chat-left-text"></i>
+                            <strong>Raison du retour</strong>
+                        </div>
+                        <div class="reason-content">
+                            {{ request.reason }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if request.admin_response %}
+                <div class="mb-3">
+                    <div class="response-card">
+                        <div class="response-header">
+                            <i class="bi bi-reply-fill"></i>
+                            <strong>Votre réponse</strong>
+                        </div>
+                        <div class="response-content">
+                            {{ request.admin_response }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if request.status == 'pending' %}
+                <div class="mt-3">
+                    <a href="{% url 'admin-process-return' request.id %}" class="btn-process">
+                        <i class="bi bi-gear"></i> Traiter cette demande
+                    </a>
+                </div>
+                {% else %}
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-clock"></i> Traitée le {{ request.updated_at|date:"d/m/Y à H:i" }}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if request.photo %}
+            <div class="col-md-4 text-center">
+                <strong style="color: #872D37;">Photo fournie:</strong>
+                <div class="mt-2">
+                    <a href="{{ request.photo.url }}" target="_blank">
+                        <img src="{{ request.photo.url }}" alt="Photo du produit" class="return-photo">
+                    </a>
+                    <br>
+                    <small class="text-muted">Cliquez pour agrandir</small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-inbox" style="font-size: 5rem; color: #C78C3A;"></i>
+        </div>
+        <h4 style="color: #872D37;">Aucune demande de retour</h4>
+        <p class="text-muted">
+            {% if status_filter == 'pending' %}
+                Il n'y a aucune demande en attente pour le moment.
+            {% elif status_filter == 'approved' %}
+                Aucune demande n'a été approuvée.
+            {% elif status_filter == 'rejected' %}
+                Aucune demande n'a été refusée.
+            {% else %}
+                Aucune demande de retour n'a été reçue.
+            {% endif %}
+        </p>
+    </div>
+{% endif %}
+
+<div class="mt-4 text-center">
+    <a href="{% url 'admin-dashboard' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Retour au Dashboard
+    </a>
+</div>
+{% endblock %}

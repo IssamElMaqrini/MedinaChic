@@ -172,8 +172,17 @@
 
 <div class="dashboard-container">
     <div class="dashboard-header">
-        <h1>🎯 Beheerders Dashboard</h1>
-        <p class="mb-0">Voorraadbeheer, bestellingen en accounts</p>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>🎯 Beheerders Dashboard</h1>
+                <p class="mb-0">Voorraadbeheer, bestellingen en accounts</p>
+            </div>
+            <div>
+                <a href="{% url 'admin-return-requests-nl' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-arrow-return-left"></i> Retourverzoeken
+                </a>
+            </div>
+        </div>
     </div>
     
     <!-- Statistiques -->

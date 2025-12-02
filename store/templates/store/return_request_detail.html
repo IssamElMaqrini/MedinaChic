@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4" style="color: #872D37;">
+        <i class="bi bi-arrow-return-left"></i> Détails de la demande de retour #{{ return_request.id }}
+    </h2>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Informations de la commande -->
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #872D37; color: white;">
+                    <strong><i class="bi bi-box"></i> Informations de la commande</strong>
+                </div>
+                <div class="card-body">
+                    <p><strong>Numéro de commande:</strong> #{{ return_request.order.id }}</p>
+                    <p><strong>Date de commande:</strong> {{ return_request.order.order_date|date:"d/m/Y à H:i" }}</p>
+                    <p><strong>Montant total:</strong> {{ return_request.order.total_amount|floatformat:2 }} €</p>
+                    <a href="{% url 'order-history' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour à mes commandes
+                    </a>
+                </div>
+            </div>
+
+            <!-- Détails de la demande -->
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #872D37; color: white;">
+                    <strong><i class="bi bi-file-text"></i> Détails de la demande</strong>
+                </div>
+                <div class="card-body">
+                    <p><strong>Raison du retour:</strong></p>
+                    <div class="p-3 bg-light rounded mb-3">
+                        {{ return_request.reason }}
+                    </div>
+
+                    {% if return_request.photo %}
+                    <p><strong>Photo jointe:</strong></p>
+                    <div class="mb-3">
+                        <a href="{{ return_request.photo.url }}" target="_blank">
+                            <img src="{{ return_request.photo.url }}" alt="Photo du retour" class="img-fluid rounded" style="max-width: 500px;">
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <p><strong>Date de demande:</strong> {{ return_request.created_at|date:"d/m/Y à H:i" }}</p>
+                </div>
+            </div>
+
+            <!-- Statut et réponse -->
+            <div class="card mb-4">
+                <div class="card-header {% if return_request.status == 'approved' %}bg-success{% elif return_request.status == 'rejected' %}bg-danger{% else %}bg-warning{% endif %} text-white">
+                    <strong><i class="bi bi-info-circle"></i> Statut de la demande</strong>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        {% if return_request.status == 'pending' %}
+                            <span class="badge bg-warning text-dark" style="font-size: 1.2em;">
+                                <i class="bi bi-hourglass-split"></i> En attente de traitement
+                            </span>
+                            <p class="mt-3 text-muted">Votre demande de retour est en cours d'examen par notre équipe. Vous recevrez une notification dès qu'une décision sera prise.</p>
+                        {% elif return_request.status == 'approved' %}
+                            <span class="badge bg-success" style="font-size: 1.2em;">
+                                <i class="bi bi-check-circle"></i> Demande approuvée
+                            </span>
+                            <p class="mt-3"><strong>Date de décision:</strong> {{ return_request.updated_at|date:"d/m/Y à H:i" }}</p>
+                            
+                            {% if return_request.admin_response %}
+                            <div class="alert alert-success mt-3">
+                                <h5><i class="bi bi-chat-left-text"></i> Réponse de l'administrateur:</h5>
+                                <p class="mb-0">{{ return_request.admin_response }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="alert alert-info mt-3">
+                                <strong><i class="bi bi-info-circle"></i> Prochaines étapes:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Préparez votre colis avec tous les articles de la commande</li>
+                                    <li>Nous vous contacterons prochainement pour organiser la récupération</li>
+                                    <li>Le remboursement sera effectué après réception et vérification des articles</li>
+                                </ul>
+                            </div>
+                        {% elif return_request.status == 'rejected' %}
+                            <span class="badge bg-danger" style="font-size: 1.2em;">
+                                <i class="bi bi-x-circle"></i> Demande refusée
+                            </span>
+                            <p class="mt-3"><strong>Date de décision:</strong> {{ return_request.updated_at|date:"d/m/Y à H:i" }}</p>
+                            
+                            {% if return_request.admin_response %}
+                            <div class="alert alert-danger mt-3">
+                                <h5><i class="bi bi-chat-left-text"></i> Raison du refus:</h5>
+                                <p class="mb-0">{{ return_request.admin_response }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="alert alert-info mt-3">
+                                <strong><i class="bi bi-info-circle"></i> Besoin d'aide?</strong>
+                                <p class="mb-0 mt-2">Si vous pensez qu'il y a eu une erreur ou si vous avez des questions, n'hésitez pas à nous contacter.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Articles à retourner -->
+            <div class="card">
+                <div class="card-header" style="background-color: #C78C3A; color: white;">
+                    <strong><i class="bi bi-list-ul"></i> Articles à retourner</strong>
+                </div>
+                <div class="card-body">
+                    {% for return_item in return_request.items.all %}
+                    <div class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                        <div class="d-flex">
+                            {% if return_item.order_item.product_thumbnail %}
+                            <img src="{{ return_item.order_item.product_thumbnail }}" alt="{{ return_item.order_item.product_name }}" class="img-thumbnail me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-image text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <strong>{{ return_item.order_item.product_name }}</strong><br>
+                                <span class="badge bg-primary">{{ return_item.quantity }}</span> 
+                                <small class="text-muted">/ {{ return_item.order_item.quantity }} commandé(s)</small><br>
+                                <small class="text-muted">{{ return_item.order_item.product_price|floatformat:2 }} € x {{ return_item.quantity }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="mt-3 pt-3 border-top">
+                        <strong>Montant du retour: {{ return_request.get_total_return_amount|floatformat:2 }} €</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'order-history' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à mes commandes
+        </a>
+        <a href="{% url 'notifications' %}" class="btn btn-outline-primary">
+            <i class="bi bi-bell"></i> Voir mes notifications
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,272 @@
+{% extends 'base_nl.html' %}
+{% load store_filters %}
+
+{% block content %}
+<style>
+    .return-request-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .page-title {
+        color: #872D37;
+        border-bottom: 3px solid #C78C3A;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .order-summary {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        border: 2px solid #872D37;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .order-summary .summary-header {
+        background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .order-summary .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .order-summary .summary-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 3px solid #C78C3A;
+    }
+
+    .order-summary .summary-item .label {
+        color: #6c757d;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .order-summary .summary-item .value {
+        color: #212529;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .form-label {
+        color: #872D37;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        padding: 0.75rem;
+    }
+
+    .form-control:focus {
+        border-color: #872D37;
+        box-shadow: 0 0 0 0.2rem rgba(135, 45, 55, 0.25);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #872D37 0%, #C78C3A 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(135, 45, 55, 0.3);
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 5px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-cancel:hover {
+        background: #5a6268;
+        color: white;
+    }
+</style>
+
+<div class="return-request-container">
+    <h2 class="page-title">
+        <i class="bi bi-arrow-return-left"></i> Retourverzoek
+    </h2>
+
+    <div class="order-summary">
+        <div class="summary-header">
+            <i class="bi bi-box-seam fs-5"></i>
+            <h4 class="mb-0">Bestelling #{{ order.id }}</h4>
+        </div>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="label">
+                    <i class="bi bi-calendar-event"></i> Besteldatum
+                </div>
+                <div class="value">{{ order.order_date|date:"d/m/Y" }}<br>
+                    <small class="text-muted">{{ order.order_date|date:"H:i" }}</small>
+                </div>
+            </div>
+            <div class="summary-item">
+                <div class="label">
+                    <i class="bi bi-currency-euro"></i> Totaalbedrag
+                </div>
+                <div class="value">{{ order.total_amount|floatformat:2 }} €</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">
+                    <i class="bi bi-cart-check"></i> Aantal artikelen
+                </div>
+                <div class="value">
+                    <span class="badge bg-secondary" style="font-size: 1rem; background: #872D37 !important;">{{ order.items.count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Sélection des produits à retourner -->
+        <div class="mb-4">
+            <label class="form-label">
+                <i class="bi bi-box-seam"></i> Te retourneren artikelen
+            </label>
+            <p class="text-muted small">Selecteer de artikelen die u wilt retourneren en geef de hoeveelheden op.</p>
+            
+            {% for item in order.items.all %}
+            <div class="card mb-3" style="border: 2px solid #ddd;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-1">
+                            <div class="form-check">
+                                <input type="checkbox" name="item_{{ item.id }}" id="id_item_{{ item.id }}" class="form-check-input" checked>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            {% if item.product_thumbnail %}
+                            <img src="{{ item.product_thumbnail }}" alt="{{ item.product_name }}" class="img-thumbnail" style="max-width: 80px;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="bi bi-image text-muted fs-3"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-5">
+                            <h6 class="mb-1">
+                                <label for="id_item_{{ item.id }}" style="cursor: pointer; margin: 0;">
+                                    {{ item.product_name }}
+                                </label>
+                            </h6>
+                            <small class="text-muted">Prijs per stuk: € {{ item.product_price|floatformat:2 }}</small><br>
+                            <small class="text-muted">Bestelde hoeveelheid: {{ item.quantity }}</small>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="id_quantity_{{ item.id }}" class="form-label small mb-1">Te retourneren:</label>
+                            <input type="number" name="quantity_{{ item.id }}" id="id_quantity_{{ item.id }}" class="form-control form-control-sm" style="width: 80px;" value="{{ item.quantity }}" min="1" max="{{ item.quantity }}">
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <strong>€ {{ item.subtotal|floatformat:2 }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            <label for="{{ form.reason.id_for_label }}" class="form-label">
+                <i class="bi bi-chat-left-text"></i> Reden voor retour
+            </label>
+            {{ form.reason }}
+            {% if form.reason.errors %}
+                <div class="text-danger mt-1">{{ form.reason.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-4">
+            <label for="{{ form.photo.id_for_label }}" class="form-label">
+                <i class="bi bi-camera"></i> Foto van het product (optioneel)
+            </label>
+            {{ form.photo }}
+            {% if form.photo.errors %}
+                <div class="text-danger mt-1">{{ form.photo.errors }}</div>
+            {% endif %}
+            <small class="text-muted d-block mt-1">
+                Een foto kan helpen om uw verzoek sneller te verwerken.
+            </small>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn-submit">
+                <i class="bi bi-send"></i> Verzoek verzenden
+            </button>
+            <a href="{% url 'order-history-nl' %}" class="btn-cancel">
+                <i class="bi bi-x-circle"></i> Annuleren
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gérer l'activation/désactivation des champs quantité selon la checkbox
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="id_item_"]');
+    
+    checkboxes.forEach(checkbox => {
+        const itemId = checkbox.id.replace('id_item_', '');
+        const quantityField = document.getElementById('id_quantity_' + itemId);
+        
+        if (quantityField) {
+            // État initial
+            quantityField.disabled = !checkbox.checked;
+            quantityField.parentElement.style.opacity = checkbox.checked ? '1' : '0.5';
+            
+            // Écouter les changements
+            checkbox.addEventListener('change', function() {
+                quantityField.disabled = !this.checked;
+                quantityField.parentElement.style.opacity = this.checked ? '1' : '0.5';
+                
+                // Si décoché, remettre la quantité max
+                if (!this.checked) {
+                    quantityField.value = quantityField.max;
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
