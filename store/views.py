@@ -307,6 +307,38 @@ def delete_cart(request):
 
     return redirect('index')
 
+@login_required
+def delete_cart_item(request, order_id):
+    """Supprimer un article individuel du panier"""
+    from django.contrib import messages
+    
+    try:
+        order = Order.objects.get(id=order_id, user=request.user, ordered=False)
+        product_name = order.product.name
+        
+        # Libérer la réservation si elle existe
+        if order.reserved_until:
+            order.release_reservation()
+        
+        # Supprimer l'ordre
+        order.delete()
+        messages.success(request, f"'{product_name}' a été retiré de votre panier.")
+        
+        # Vérifier si le panier est vide
+        try:
+            cart = request.user.cart
+            if cart.orders.count() == 0:
+                cart.delete()
+                messages.info(request, "Votre panier est maintenant vide.")
+                return redirect('index')
+        except Cart.DoesNotExist:
+            return redirect('index')
+            
+    except Order.DoesNotExist:
+        messages.error(request, "Cet article n'existe pas dans votre panier.")
+    
+    return redirect('cart')
+
 @csrf_exempt
 def stripe_webhook(request):
     payload = request.body

@@ -90,9 +90,21 @@
                                             <i class="bi bi-person-circle" style="color: #C78C3A;"></i>
                                             <strong>{{ comment.author.email }}</strong>
                                         </div>
-                                        <small class="text-muted">
-                                            {{ comment.created_at|date:"d/m/Y om H:i" }}
-                                        </small>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <small class="text-muted">
+                                                {{ comment.created_at|date:"d/m/Y om H:i" }}
+                                            </small>
+                                            {% if user.is_authenticated and user == comment.author or user.is_staff %}
+                                                <a href="{% url 'delete_comment_nl' comment.id %}" 
+                                                   class="btn btn-sm" 
+                                                   style="background-color: #872D37; color: white; border: none; transition: all 0.3s ease;"
+                                                   onmouseover="this.style.backgroundColor='#C78C3A';"
+                                                   onmouseout="this.style.backgroundColor='#872D37';"
+                                                   onclick="return confirm('Weet u zeker dat u deze reactie wilt verwijderen?');">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                     <p class="mb-0" style="white-space: pre-wrap;">{{ comment.content }}</p>
                                 </div>

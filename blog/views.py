@@ -208,6 +208,38 @@ def add_comment_nl(request, slug):
     return redirect('blog_detail_nl', slug=slug)
 
 
+@login_required
+def delete_comment(request, comment_id):
+    """Supprimer un commentaire (FR) - Admin ou auteur du commentaire"""
+    comment = get_object_or_404(BlogComment, id=comment_id)
+    post_slug = comment.post.slug
+    
+    # Vérifier les permissions : auteur du commentaire ou admin
+    if request.user == comment.author or request.user.is_staff:
+        comment.delete()
+        messages.success(request, "Le commentaire a été supprimé.")
+    else:
+        messages.error(request, "Vous n'avez pas la permission de supprimer ce commentaire.")
+    
+    return redirect('blog_detail', slug=post_slug)
+
+
+@login_required
+def delete_comment_nl(request, comment_id):
+    """Supprimer un commentaire (NL) - Admin ou auteur du commentaire"""
+    comment = get_object_or_404(BlogComment, id=comment_id)
+    post_slug = comment.post.slug
+    
+    # Vérifier les permissions : auteur du commentaire ou admin
+    if request.user == comment.author or request.user.is_staff:
+        comment.delete()
+        messages.success(request, "De reactie is verwijderd.")
+    else:
+        messages.error(request, "U heeft geen toestemming om deze reactie te verwijderen.")
+    
+    return redirect('blog_detail_nl', slug=post_slug)
+
+
 # ============== CHAT VIEWS ==============
 
 @login_required
