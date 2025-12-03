@@ -3,22 +3,26 @@ from django import forms
 from store.models import Order, ProductReview, ReturnRequest
 
 class OrderForm(forms.ModelForm):
-    quantity = forms.ChoiceField(choices=[(i, i) for i in range(1, 11)])
     delete = forms.BooleanField(initial=False, required=False, label="Delete")
 
     class Meta:
         model = Order
         fields = ['quantity']
+        widgets = {
+            'quantity': forms.Select(choices=[(i, i) for i in range(1, 11)])
+        }
 
-
-    def save(self, *args, **kwargs):
-        if self.cleaned_data['delete']:
+    def save(self, commit=True, *args, **kwargs):
+        if self.cleaned_data.get('delete'):
             self.instance.delete()
             if self.instance.user.cart.orders.count() == 0:
                 self.instance.user.cart.delete()
-            return True
-
-        return super().save(*args, **kwargs)
+            return None
+        
+        if commit:
+            self.instance.save()
+        
+        return self.instance
 
 
 class ProductReviewForm(forms.ModelForm):

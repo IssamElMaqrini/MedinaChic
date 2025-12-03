@@ -120,11 +120,20 @@ def cart(request):
 def update_quantities(request):
     from django.contrib import messages
     
+    print("DEBUG: update_quantities appelée")
+    print(f"DEBUG: POST data = {request.POST}")
+    
     OrderFormSet = modelformset_factory(Order, form=OrderForm, extra=0)
     formset = OrderFormSet(request.POST, queryset=Order.objects.filter(user=request.user, ordered=False))
     
+    print(f"DEBUG: Formset is_valid = {formset.is_valid()}")
+    if not formset.is_valid():
+        print(f"DEBUG: Formset errors = {formset.errors}")
+    
     if formset.is_valid():
+        print(f"DEBUG: Nombre de formulaires = {len(formset)}")
         for form in formset:
+            print(f"DEBUG: Form data = {form.cleaned_data}")
             if form.cleaned_data.get('delete'):
                 # Si suppression, libérer la réservation
                 if form.instance.reserved_until:
@@ -132,7 +141,8 @@ def update_quantities(request):
                 continue
             
             order = form.instance
-            new_quantity = int(form.cleaned_data.get('quantity', 0))
+            new_quantity = form.cleaned_data.get('quantity')
+            print(f"DEBUG: Produit={order.product.name}, Ancienne quantité={order.quantity}, Nouvelle quantité={new_quantity}")
             
             # Nettoyer les réservations expirées pour ce produit
             Order.objects.filter(
@@ -159,7 +169,9 @@ def update_quantities(request):
                     order.delete()
                     messages.warning(request, f"'{order.product.name}' retiré du panier (rupture de stock).")
             else:
-                form.save()
+                # Explicitly set quantity and save
+                order.quantity = new_quantity
+                order.save()
                 messages.success(request, f"Quantité mise à jour pour '{order.product.name}'.")
         
         # Vérifier si le panier est vide
